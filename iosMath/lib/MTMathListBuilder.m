@@ -436,7 +436,7 @@ NSString *const MTParseError = @"ParseError";
         // The command is an accent
         accent.innerList = [self buildInternal:true];
         return accent;
-    } else if ([command isEqualToString:@"cancel"]) {
+    } else if ([command isEqualToString:@"sout"]) {
         // The cancel command has 1 arguments
         MTCancelLine* over = [MTCancelLine new];
         over.innerList = [self buildInternal:true];

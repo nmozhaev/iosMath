@@ -371,13 +371,6 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
         [table setAlignment:kMTColumnAlignmentLeft forColumn:2];
         return table;
     } else if ([env isEqualToString:@"cases"]) {
-        if (table.numColumns != 2) {
-            NSString* message = @"cases environment can only have 2 columns";
-            if (error != nil) {
-                *error = [NSError errorWithDomain:MTParseError code:MTParseErrorInvalidNumColumns userInfo:@{ NSLocalizedDescriptionKey : message }];
-            }
-            return nil;
-        }
         table.interRowAdditionalSpacing = 0;
         table.interColumnSpacing = 18;
         [table setAlignment:kMTColumnAlignmentLeft forColumn:0];

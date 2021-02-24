@@ -672,6 +672,23 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 break;
             }
                 
+            case kMTMathAtomCancelline: {
+                // stash the existing layout
+                if (_currentLine.length > 0) {
+                    [self addDisplayLine];
+                }
+                MTCancelLine* cancel = (MTCancelLine*) atom;
+                [self addInterElementSpace:prevNode currentType:atom.type];
+                MTDisplay* display = [self makeCancelLine:cancel];
+                [_displayAtoms addObject:display];
+                _currentPosition.x += display.width;
+                // add super scripts || subscripts
+                if (atom.subScript || atom.superScript) {
+                    [self makeScripts:atom display:display index:atom.indexRange.location delta:0];
+                }
+                break;
+            }
+                
             case kMTMathAtomLargeOperator: {
                 // stash the existing layout
                 if (_currentLine.length > 0) {
@@ -1582,6 +1599,19 @@ static const NSInteger kDelimiterShortfallPoints = 5;
     overDisplay.descent = innerListDisplay.descent;
     overDisplay.width = innerListDisplay.width;
     return overDisplay;
+}
+
+- (MTDisplay*) makeCancelLine:(MTCancelLine*) cancel
+{
+    MTMathListDisplay* innerListDisplay = [MTTypesetter createLineForMathList:cancel.innerList font:_font style:_style cramped:_cramped];
+    MTLineDisplay* underDisplay = [[MTLineDisplay alloc] initWithInner:innerListDisplay position:_currentPosition range:cancel.indexRange];
+    // Move the line down by the vertical gap.
+    underDisplay.lineShiftUp = -(innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap);
+    underDisplay.lineThickness = _styleFont.mathTable.underbarRuleThickness;
+    underDisplay.ascent = innerListDisplay.ascent;
+    underDisplay.descent = innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap + _styleFont.mathTable.underbarRuleThickness + _styleFont.mathTable.underbarExtraDescender;
+    underDisplay.width = innerListDisplay.width;
+    return underDisplay;
 }
 
 #pragma mark Accents

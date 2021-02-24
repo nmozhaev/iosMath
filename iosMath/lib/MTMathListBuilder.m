@@ -4,7 +4,7 @@
 //
 //  Created by Kostub Deshmukh on 8/28/13.
 //  Copyright (C) 2013 MathChat
-//   
+//
 //  This software may be modified and distributed under the terms of the
 //  MIT license. See the LICENSE file for details.
 //
@@ -436,6 +436,11 @@ NSString *const MTParseError = @"ParseError";
         // The command is an accent
         accent.innerList = [self buildInternal:true];
         return accent;
+    } else if ([command isEqualToString:@"cancel"]) {
+        // The cancel command has 1 arguments
+        MTCancelLine* over = [MTCancelLine new];
+        over.innerList = [self buildInternal:true];
+        return over;
     } else if ([command isEqualToString:@"frac"]) {
         // A fraction command has 2 arguments
         MTFraction* frac = [MTFraction new];

@@ -4,7 +4,7 @@
 //
 //  Created by Kostub Deshmukh on 8/26/13.
 //  Copyright (C) 2013 MathChat
-//   
+//
 //  This software may be modified and distributed under the terms of the
 //  MIT license. See the LICENSE file for details.
 //
@@ -70,6 +70,8 @@ static NSString* typeToText(MTMathAtomType type) {
             return @"Color";
         case kMTMathAtomTable:
             return @"Table";
+        case kMTMathAtomCancelline:
+            return @"Cancelline";
     }
 }
 
@@ -215,7 +217,7 @@ static NSString* typeToText(MTMathAtomType type) {
         [_fusedAtoms addObjectsFromArray:atom.fusedAtoms];
     } else {
         [_fusedAtoms addObject:atom];
-    }    
+    }
     
     // Update the nucleus
     NSMutableString* str = self.nucleus.mutableCopy;
@@ -820,6 +822,42 @@ static NSString* typeToText(MTMathAtomType type) {
 - (NSUInteger) numRows
 {
     return self.cells.count;
+}
+
+@end
+
+#pragma mark - MTCancelLine
+
+@implementation MTCancelLine
+
+- (instancetype)init
+{
+    self = [super initWithType:kMTMathAtomCancelline value:@""];
+    return self;
+}
+
+- (instancetype)initWithType:(MTMathAtomType)type value:(NSString *)value
+{
+    if (type == kMTMathAtomCancelline) {
+        return [self init];
+    }
+    @throw [NSException exceptionWithName:@"InvalidMethod"
+                                   reason:@"[MTCancelLine initWithType:value:] cannot be called. Use [MTCancelLine init] instead."
+                                 userInfo:nil];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MTUnderLine* op = [super copyWithZone:zone];
+    op.innerList = [self.innerList copyWithZone:zone];
+    return op;
+}
+
+- (instancetype)finalized
+{
+    MTCancelLine* newCancelline = [super finalized];
+    newCancelline.innerList = newCancelline.innerList.finalized;
+    return newCancelline;
 }
 
 @end

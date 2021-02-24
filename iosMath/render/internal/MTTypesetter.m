@@ -677,8 +677,11 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 if (_currentLine.length > 0) {
                     [self addDisplayLine];
                 }
+                
+                [self addInterElementSpace:prevNode currentType:kMTMathAtomOrdinary];
+                atom.type = kMTMathAtomOrdinary;
+                
                 MTCancelLine* cancel = (MTCancelLine*) atom;
-                [self addInterElementSpace:prevNode currentType:atom.type];
                 MTDisplay* display = [self makeCancelLine:cancel];
                 [_displayAtoms addObject:display];
                 _currentPosition.x += display.width;
@@ -1604,14 +1607,15 @@ static const NSInteger kDelimiterShortfallPoints = 5;
 - (MTDisplay*) makeCancelLine:(MTCancelLine*) cancel
 {
     MTMathListDisplay* innerListDisplay = [MTTypesetter createLineForMathList:cancel.innerList font:_font style:_style cramped:_cramped];
-    MTLineDisplay* underDisplay = [[MTLineDisplay alloc] initWithInner:innerListDisplay position:_currentPosition range:cancel.indexRange];
+    MTLineDisplay* lineDisplay = [[MTLineDisplay alloc] initWithInner:innerListDisplay position:_currentPosition range:cancel.indexRange];
     // Move the line down by the vertical gap.
-    underDisplay.lineShiftUp = -(innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap);
-    underDisplay.lineThickness = _styleFont.mathTable.underbarRuleThickness;
-    underDisplay.ascent = innerListDisplay.ascent;
-    underDisplay.descent = innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap + _styleFont.mathTable.underbarRuleThickness + _styleFont.mathTable.underbarExtraDescender;
-    underDisplay.width = innerListDisplay.width;
-    return underDisplay;
+    lineDisplay.lineShiftUp = innerListDisplay.ascent / 2;
+    lineDisplay.lineThickness = _styleFont.mathTable.fractionRuleThickness;
+    lineDisplay.ascent = innerListDisplay.ascent;
+    lineDisplay.descent = innerListDisplay.descent;
+    lineDisplay.width = innerListDisplay.width;
+    lineDisplay.insets = UIEdgeInsetsMake(0, 2.5, 0, 2.5);
+    return lineDisplay;
 }
 
 #pragma mark Accents

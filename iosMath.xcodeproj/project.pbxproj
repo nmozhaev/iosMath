@@ -250,6 +250,8 @@
 			children = (
 				49EEFD791D19B616002D15C4 /* internal */,
 				49DEC8081CEEC865000053CD /* fonts */,
+				49EEFD7A1D19B664002D15C4 /* MTTypesetter.h */,
+				49EEFD7B1D19B664002D15C4 /* MTTypesetter.m */,
 				492EECF317DAED9000939107 /* MTMathListDisplay.h */,
 				492EECF617DAED9000939107 /* MTMathListDisplay.m */,
 				492EECF417DAED9000939107 /* MTMathUILabel.h */,
@@ -298,8 +300,6 @@
 			isa = PBXGroup;
 			children = (
 				49DEC80B1CEF1028000053CD /* MTFont+Internal.h */,
-				49EEFD7A1D19B664002D15C4 /* MTTypesetter.h */,
-				49EEFD7B1D19B664002D15C4 /* MTTypesetter.m */,
 				49EEFD7E1D19B94C002D15C4 /* MTMathListDisplayInternal.h */,
 			);
 			path = internal;

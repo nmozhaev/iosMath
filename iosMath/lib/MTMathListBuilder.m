@@ -229,17 +229,18 @@ NSString *const MTParseError = @"ParseError";
         } else if (_spacesAllowed && ch == ' ') {
             // If spaces are allowed then spaces do not need escaping with a \ before being used.
             atom = [MTMathAtomFactory atomForLatexSymbolName:@" "];
-        } else {
+        } else if (ch != ' ') {
             atom = [MTMathAtomFactory atomForCharacter:ch];
             if (!atom) {
                 // Not a recognized character
                 continue;
             }
         }
-        NSAssert(atom != nil, @"Atom shouldn't be nil");
-        atom.fontStyle = _currentFontStyle;
-        [list addAtom:atom];
-        prevAtom = atom;
+        if (atom) {
+            atom.fontStyle = _currentFontStyle;
+            [list addAtom:atom];
+            prevAtom = atom;
+        }
         
         if (oneCharOnly) {
             // we consumed our onechar

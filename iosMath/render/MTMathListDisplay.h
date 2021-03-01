@@ -165,6 +165,7 @@ typedef NS_ENUM(unsigned int, MTLinePosition)  {
  to the parent is not treated as a sub-display.
  */
 @property (nonatomic, readonly) MTMathListDisplay* inner;
+@property (nonatomic) UIEdgeInsets insets;
 
 @end
 

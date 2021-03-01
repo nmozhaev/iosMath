@@ -691,6 +691,7 @@ static BOOL isIos6Supported() {
         
         self.position = position;
         self.range = range;
+        self.insets = UIEdgeInsetsZero;
     }
     return self;
 }
@@ -711,8 +712,8 @@ static BOOL isIos6Supported() {
     
     // draw the horizontal line
     MTBezierPath* path = [MTBezierPath bezierPath];
-    CGPoint lineStart = CGPointMake(self.position.x, self.position.y + self.lineShiftUp);
-    CGPoint lineEnd = CGPointMake(lineStart.x + self.inner.width, lineStart.y);
+    CGPoint lineStart = CGPointMake(self.position.x - self.insets.left, self.position.y + self.lineShiftUp);
+    CGPoint lineEnd = CGPointMake(lineStart.x + self.inner.width + self.insets.right * 2, lineStart.y);
     [path moveToPoint:lineStart];
     [path addLineToPoint:lineEnd];
     path.lineWidth = self.lineThickness;

@@ -672,6 +672,26 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 break;
             }
                 
+            case kMTMathAtomCancelline: {
+                // stash the existing layout
+                if (_currentLine.length > 0) {
+                    [self addDisplayLine];
+                }
+                
+                [self addInterElementSpace:prevNode currentType:kMTMathAtomOrdinary];
+                atom.type = kMTMathAtomOrdinary;
+                
+                MTCancelLine* cancel = (MTCancelLine*) atom;
+                MTDisplay* display = [self makeCancelLine:cancel];
+                [_displayAtoms addObject:display];
+                _currentPosition.x += display.width;
+                // add super scripts || subscripts
+                if (atom.subScript || atom.superScript) {
+                    [self makeScripts:atom display:display index:atom.indexRange.location delta:0];
+                }
+                break;
+            }
+                
             case kMTMathAtomLargeOperator: {
                 // stash the existing layout
                 if (_currentLine.length > 0) {
@@ -1582,6 +1602,20 @@ static const NSInteger kDelimiterShortfallPoints = 5;
     overDisplay.descent = innerListDisplay.descent;
     overDisplay.width = innerListDisplay.width;
     return overDisplay;
+}
+
+- (MTDisplay*) makeCancelLine:(MTCancelLine*) cancel
+{
+    MTMathListDisplay* innerListDisplay = [MTTypesetter createLineForMathList:cancel.innerList font:_font style:_style cramped:_cramped];
+    MTLineDisplay* lineDisplay = [[MTLineDisplay alloc] initWithInner:innerListDisplay position:_currentPosition range:cancel.indexRange];
+    // Move the line down by the vertical gap.
+    lineDisplay.lineShiftUp = innerListDisplay.ascent / 2;
+    lineDisplay.lineThickness = _styleFont.mathTable.fractionRuleThickness;
+    lineDisplay.ascent = innerListDisplay.ascent;
+    lineDisplay.descent = innerListDisplay.descent;
+    lineDisplay.width = innerListDisplay.width;
+    lineDisplay.insets = UIEdgeInsetsMake(0, 2.5, 0, 2.5);
+    return lineDisplay;
 }
 
 #pragma mark Accents

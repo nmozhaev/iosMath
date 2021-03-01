@@ -4,7 +4,7 @@
 //
 //  Created by Kostub Deshmukh on 8/26/13.
 //  Copyright (C) 2013 MathChat
-//   
+//
 //  This software may be modified and distributed under the terms of the
 //  MIT license. See the LICENSE file for details.
 //
@@ -56,6 +56,8 @@ typedef NS_ENUM(NSUInteger, MTMathAtomType)
     kMTMathAtomUnderline,
     /// An overlined atom - Over in TeX
     kMTMathAtomOverline,
+    /// An crosslined atom - Cancel in Tex
+    kMTMathAtomCancelline,
     /// An accented atom - Accent in TeX
     kMTMathAtomAccent,
     
@@ -244,6 +246,17 @@ typedef NS_ENUM(NSUInteger, MTFontStyle)
 
 /** An atom with a line over the contained math list. */
 @interface MTOverLine : MTMathAtom
+
+/// Creates an empty over
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
+/// The inner math list
+@property (nonatomic, nullable) MTMathList* innerList;
+
+@end
+
+/** An atom with a line cross the contained math list. */
+@interface MTCancelLine : MTMathAtom
 
 /// Creates an empty over
 - (instancetype)init NS_DESIGNATED_INITIALIZER;

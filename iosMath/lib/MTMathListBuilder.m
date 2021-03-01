@@ -4,7 +4,7 @@
 //
 //  Created by Kostub Deshmukh on 8/28/13.
 //  Copyright (C) 2013 MathChat
-//   
+//
 //  This software may be modified and distributed under the terms of the
 //  MIT license. See the LICENSE file for details.
 //
@@ -229,17 +229,18 @@ NSString *const MTParseError = @"ParseError";
         } else if (_spacesAllowed && ch == ' ') {
             // If spaces are allowed then spaces do not need escaping with a \ before being used.
             atom = [MTMathAtomFactory atomForLatexSymbolName:@" "];
-        } else {
+        } else if (ch != ' ') {
             atom = [MTMathAtomFactory atomForCharacter:ch];
             if (!atom) {
                 // Not a recognized character
                 continue;
             }
         }
-        NSAssert(atom != nil, @"Atom shouldn't be nil");
-        atom.fontStyle = _currentFontStyle;
-        [list addAtom:atom];
-        prevAtom = atom;
+        if (atom) {
+            atom.fontStyle = _currentFontStyle;
+            [list addAtom:atom];
+            prevAtom = atom;
+        }
         
         if (oneCharOnly) {
             // we consumed our onechar
@@ -436,6 +437,11 @@ NSString *const MTParseError = @"ParseError";
         // The command is an accent
         accent.innerList = [self buildInternal:true];
         return accent;
+    } else if ([command isEqualToString:@"sout"]) {
+        // The cancel command has 1 arguments
+        MTCancelLine* over = [MTCancelLine new];
+        over.innerList = [self buildInternal:true];
+        return over;
     } else if ([command isEqualToString:@"frac"]) {
         // A fraction command has 2 arguments
         MTFraction* frac = [MTFraction new];

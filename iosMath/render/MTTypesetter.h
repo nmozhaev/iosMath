@@ -21,6 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// Renders a MTMathList as a list of displays.
 + (MTMathListDisplay*) createLineForMathList:(MTMathList*) mathList font:(MTFont*) font style:(MTLineStyle) style;
 
++ (NSArray*) preprocessMathList:(MTMathList*) ml;
+
 @end
 
 NS_ASSUME_NONNULL_END

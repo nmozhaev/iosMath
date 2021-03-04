@@ -1,5 +1,5 @@
 PODS:
-  - iosMath (1.0.4)
+  - iosMath (1.0.6)
 
 DEPENDENCIES:
   - iosMath (from `./`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "./"
 
 SPEC CHECKSUMS:
-  iosMath: d600132003379f24213290876f8e5d2d78c52c07
+  iosMath: f58d42225117aab60089ac44f7ee1ac9b30a948e
 
 PODFILE CHECKSUM: 08e3cba39ff00eb7f24da7c091766b46d43ec7d0
 

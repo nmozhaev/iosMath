@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "iosMath"
-  s.version      = "1.0.5"
+  s.version      = "1.0.6"
   s.summary      = "Math equation rendering for iOS and OS X"
   s.description  = <<-DESC
 iosMath is a library for typesetting math formulas in iOS and OS X using
@@ -14,7 +14,6 @@ beautifully rendered math equations in iOS/MacOS applications.
   s.ios.deployment_target = '9.0'
   s.source       = { :git => "https://github.com/tophatmonocle/iosMath.git", :tag => s.version.to_s }
   s.source_files = 'iosMath/**/*.{h,m}'
-  s.private_header_files = 'iosMath/render/internal/*.h'
   s.resource_bundles = {
      'mathFonts' => [ 'fonts/*.otf', 'fonts/*.plist' ]
   }

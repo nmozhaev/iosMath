@@ -72,6 +72,8 @@ static NSString* typeToText(MTMathAtomType type) {
             return @"Table";
         case kMTMathAtomCancelline:
             return @"Cancelline";
+        case kMTMathAtomOverlap:
+            return @"Overlap";
     }
 }
 
@@ -848,7 +850,7 @@ static NSString* typeToText(MTMathAtomType type) {
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    MTUnderLine* op = [super copyWithZone:zone];
+    MTCancelLine* op = [super copyWithZone:zone];
     op.innerList = [self.innerList copyWithZone:zone];
     return op;
 }
@@ -858,6 +860,44 @@ static NSString* typeToText(MTMathAtomType type) {
     MTCancelLine* newCancelline = [super finalized];
     newCancelline.innerList = newCancelline.innerList.finalized;
     return newCancelline;
+}
+
+@end
+
+#pragma mark - MTMathOverlap
+
+@implementation MTMathOverlap
+
+- (instancetype)init
+{
+    self = [super initWithType:kMTMathAtomOverlap value:@""];
+    return self;
+}
+
+- (instancetype)initWithType:(MTMathAtomType)type value:(NSString *)value
+{
+    if (type == kMTMathAtomOverlap) {
+        return [self init];
+    }
+    @throw [NSException exceptionWithName:@"InvalidMethod"
+                                   reason:@"[MTMathOverlap initWithType:value:] cannot be called. Use [MTMathOverlap init] instead."
+                                 userInfo:nil];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MTMathOverlap* overlap = [super copyWithZone:zone];
+    overlap.innerList = [self.innerList copyWithZone:zone];
+    overlap.overlapList = [self.overlapList copyWithZone:zone];
+    return overlap;
+}
+
+- (instancetype)finalized
+{
+    MTMathOverlap* overlap = [super finalized];
+    overlap.innerList = [self.innerList finalized];
+    overlap.overlapList = [self.overlapList finalized];
+    return overlap;
 }
 
 @end

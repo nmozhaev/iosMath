@@ -98,6 +98,7 @@ NSString *const MTParseError = @"ParseError";
         [self setError:MTParseErrorMismatchBraces message:errorMessage];
     }
     if (_error) {
+        NSLog(@"TEST: %@", [_error description]);
         return nil;
     }
     return list;
@@ -440,8 +441,14 @@ NSString *const MTParseError = @"ParseError";
     } else if ([command isEqualToString:@"sout"]) {
         // The cancel command has 1 arguments
         MTCancelLine* over = [MTCancelLine new];
+        over.style = kMTCancelStyleOut;
         over.innerList = [self buildInternal:true];
         return over;
+    } else if ([command isEqualToString:@"mathrlap"]) {
+        MTMathOverlap* lap = [MTMathOverlap new];
+        lap.innerList = [self buildInternal:true];
+        lap.overlapList = [self buildInternal:true];
+        return lap;
     } else if ([command isEqualToString:@"frac"]) {
         // A fraction command has 2 arguments
         MTFraction* frac = [MTFraction new];
@@ -528,6 +535,10 @@ NSString *const MTParseError = @"ParseError";
                               @"brack" : @[ @"[", @"]"],
                               @"brace" : @[ @"{", @"}"]};
     }
+    static NSDictionary<NSString*, NSArray*>* leftHandCommands = nil;
+    if (!leftHandCommands) {
+        leftHandCommands = @{ @"mathllap" : @[] };
+    }
     if ([command isEqualToString:@"right"]) {
         if (!self.currentInnerAtom) {
             NSString* errorMessage = @"Missing \\left";
@@ -539,6 +550,13 @@ NSString *const MTParseError = @"ParseError";
             return nil;
         }
         // return the list read so far.
+        return list;
+    } else if ([leftHandCommands objectForKey:command]) {
+        MTMathOverlap* overlap = [MTMathOverlap new];
+        overlap.innerList = list;
+        overlap.overlapList = [self buildInternal:NO];
+        MTMathList* list = [MTMathList new];
+        [list addAtom:overlap];
         return list;
     } else if ([fractionCommands objectForKey:command]) {
         MTFraction* frac = nil;

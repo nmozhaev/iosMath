@@ -683,12 +683,26 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 
                 MTCancelLine* cancel = (MTCancelLine*) atom;
                 MTDisplay* display = [self makeCancelLine:cancel];
+                
                 [_displayAtoms addObject:display];
                 _currentPosition.x += display.width;
                 // add super scripts || subscripts
                 if (atom.subScript || atom.superScript) {
                     [self makeScripts:atom display:display index:atom.indexRange.location delta:0];
                 }
+                break;
+            }
+                
+            case kMTMathAtomOverlap: {
+                if (_currentLine.length > 0) {
+                    [self addDisplayLine];
+                }
+                MTMathOverlap* overlap = (MTMathOverlap*) atom;
+                MTMathListDisplay* innerDisplay = [MTTypesetter createLineForMathList:overlap.innerList font:_font style:_style cramped:false];
+                MTMathListDisplay* overlapDisplay = [MTTypesetter createLineForMathList:overlap.overlapList font:_font style:_style cramped:false];
+                [_displayAtoms addObject:innerDisplay];
+                [_displayAtoms addObject:overlapDisplay];
+                _currentPosition.x += MAX(innerDisplay.width, overlapDisplay.width);
                 break;
             }
                 
@@ -1614,6 +1628,17 @@ static const NSInteger kDelimiterShortfallPoints = 5;
     lineDisplay.ascent = innerListDisplay.ascent;
     lineDisplay.descent = innerListDisplay.descent;
     lineDisplay.width = innerListDisplay.width;
+    CGSize innerSize = lineDisplay.inner.displayBounds.size;
+    switch(cancel.style) {
+        case kMTCancelStyleRight:
+            lineDisplay.start = CGPointMake(5, innerSize.height);
+            lineDisplay.end = CGPointMake(innerSize.width - 5, 0);
+            break;
+        case kMTCancelStyleLeft:
+            break;
+        default :
+            break;
+    }
     lineDisplay.insets = UIEdgeInsetsMake(0, 2.5, 0, 2.5);
     return lineDisplay;
 }
@@ -1707,6 +1732,16 @@ static const NSInteger kDelimiterShortfallPoints = 5;
     if (accent.nucleus.length == 0) {
         // no accent!
         return accentee;
+    }
+    if (accent.nucleus == @"\u23e0") {
+        MTGroupDisplay* display = [[MTGroupDisplay alloc] initWithInner:accentee position:_currentPosition range:accent.indexRange];
+        display.start = CGPointMake(0, accentee.displayBounds.size.height);
+        display.end = CGPointMake(accentee.displayBounds.size.width, accentee.displayBounds.size.height);
+        display.lineThickness = _styleFont.mathTable.fractionRuleThickness;
+        display.width = accentee.width;
+        display.ascent = accentee.ascent;
+        display.descent = accentee.descent;
+        return display;
     }
     CGGlyph accentGlyph = [self findGlyphForCharacterAtIndex:accent.nucleus.length - 1 inString:accent.nucleus];
     CGFloat accenteeWidth = accentee.width;

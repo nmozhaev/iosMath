@@ -156,6 +156,7 @@ typedef NS_ENUM(unsigned int, MTLinePosition)  {
 
 @end
 
+
 /// Rendering of an list with an overline or underline
 @interface MTLineDisplay : MTDisplay
 
@@ -166,6 +167,16 @@ typedef NS_ENUM(unsigned int, MTLinePosition)  {
  */
 @property (nonatomic, readonly) MTMathListDisplay* inner;
 @property (nonatomic) UIEdgeInsets insets;
+@property (nonatomic) CGPoint start;
+@property (nonatomic) CGPoint end;
+
+@end
+
+@interface MTCurveBracketDisplay : MTLineDisplay
+
+@end
+
+@interface MTGroupDisplay : MTLineDisplay
 
 @end
 

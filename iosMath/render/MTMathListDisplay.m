@@ -679,6 +679,87 @@ static BOOL isIos6Supported() {
 
 @end
 
+#pragma mark - MTCurveBracketDisplay
+
+@implementation MTCurveBracketDisplay
+
+- (void)draw:(CGContextRef)context
+{
+    [self.inner draw:context];
+
+    CGContextSaveGState(context);
+
+    [self.textColor setStroke];
+    
+    MTBezierPath* path = [MTBezierPath bezierPath];
+    [path moveToPoint: CGPointZero];
+    [path addCurveToPoint:CGPointMake(0.5, -0.1) controlPoint1:CGPointMake(0, -0.2) controlPoint2:CGPointMake(0.5, 0.1)];
+    [path addCurveToPoint:CGPointMake(1, 0) controlPoint1:CGPointMake(0.5, 0.1) controlPoint2:CGPointMake(1, -0.2)];
+    
+    CGFloat scaledCosine = self.end.x - self.start.x;
+    CGFloat scaledSine = self.end.y - self.start.y;
+    CGAffineTransform transform = CGAffineTransformMake(scaledCosine, scaledSine, -scaledSine, scaledCosine, self.start.x, self.start.y);
+    [path applyTransform:transform];
+    path.lineWidth = self.lineThickness;
+    [path stroke];
+    
+    CGContextRestoreGState(context);
+}
+
+- (void) setPosition:(CGPoint)position
+{
+    super.position = position;
+    [self updateInnerPosition];
+}
+
+- (void) updateInnerPosition
+{
+    self.inner.position = CGPointMake(self.position.x, self.position.y);
+}
+
+@end
+
+#pragma mark - MTGroupDisplay
+
+@implementation MTGroupDisplay
+
+- (void)draw:(CGContextRef)context
+{
+    [self.inner draw:context];
+
+    CGContextSaveGState(context);
+
+    [self.textColor setStroke];
+    
+    CGSize innerSize = self.inner.displayBounds.size;
+    
+    CGFloat offset = innerSize.width / 15;
+    
+    MTBezierPath* path = [MTBezierPath bezierPath];
+    [path moveToPoint: self.start];
+    [path addLineToPoint:CGPointMake(self.start.x + offset, self.start.y + offset)];
+    [path addLineToPoint:CGPointMake(self.end.x - offset, self.end.y + offset)];
+    [path addLineToPoint:self.end];
+    
+    path.lineWidth = self.lineThickness;
+    [path stroke];
+    
+    CGContextRestoreGState(context);
+}
+
+- (void) setPosition:(CGPoint)position
+{
+    super.position = position;
+    [self updateInnerPosition];
+}
+
+- (void) updateInnerPosition
+{
+    self.inner.position = CGPointMake(self.position.x, self.position.y);
+}
+
+@end
+
 #pragma mark - MTLineDisplay
 
 @implementation MTLineDisplay
@@ -712,8 +793,15 @@ static BOOL isIos6Supported() {
     
     // draw the horizontal line
     MTBezierPath* path = [MTBezierPath bezierPath];
-    CGPoint lineStart = CGPointMake(self.position.x - self.insets.left, self.position.y + self.lineShiftUp);
-    CGPoint lineEnd = CGPointMake(lineStart.x + self.inner.width + self.insets.right * 2, lineStart.y);
+    CGPoint lineStart;
+    CGPoint lineEnd;
+    if (CGPointEqualToPoint(_start, _end)) {
+        lineStart = CGPointMake(self.position.x - self.insets.left, self.position.y + self.lineShiftUp);
+        lineEnd = CGPointMake(lineStart.x + self.inner.width + self.insets.right * 2, lineStart.y);
+    } else {
+        lineStart = _start;
+        lineEnd = _end;
+    }
     [path moveToPoint:lineStart];
     [path addLineToPoint:lineEnd];
     path.lineWidth = self.lineThickness;

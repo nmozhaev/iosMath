@@ -76,6 +76,8 @@ typedef NS_ENUM(NSUInteger, MTMathAtomType)
     kMTMathAtomStyle,
     kMTMathAtomColor,
     
+    kMTMathAtomOverlap,
+    
     // Atoms after this point are not part of TeX and do not have the usual structure.
     
     /// An table atom. This atom does not exist in TeX. It is equivalent to the TeX command
@@ -258,11 +260,19 @@ typedef NS_ENUM(NSUInteger, MTFontStyle)
 /** An atom with a line cross the contained math list. */
 @interface MTCancelLine : MTMathAtom
 
+typedef NS_ENUM(NSUInteger, MTCancelStyle)
+{
+    kMTCancelStyleOut = 0,
+    kMTCancelStyleRight,
+    kMTCancelStyleLeft,
+};
+
 /// Creates an empty over
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /// The inner math list
 @property (nonatomic, nullable) MTMathList* innerList;
+@property (nonatomic) MTCancelStyle style;
 
 @end
 
@@ -414,6 +424,16 @@ typedef NS_ENUM(NSInteger, MTColumnAlignment) {
 
 /// Number of rows in the table.
 - (NSUInteger) numRows;
+
+@end
+
+@interface MTMathOverlap : MTMathAtom
+
+/// Creates an empty over
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
+@property (nonatomic, nullable) MTMathList* innerList;
+@property (nonatomic, nullable) MTMathList* overlapList;
 
 @end
 

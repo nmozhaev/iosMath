@@ -740,6 +740,7 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
                     @"vec" : @"\u20D7",
                     @"widehat" : @"\u0302",
                     @"widetilde" : @"\u0303",
+                    @"overgroup" : @"\u23e0",
                     };
     }
     return accents;

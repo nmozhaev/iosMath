@@ -148,6 +148,8 @@ typedef NS_ENUM(NSUInteger, MTFontStyle)
 @property (nonatomic, nullable) MTMathList* superScript;
 /** An optional subscript. */
 @property (nonatomic, nullable) MTMathList* subScript;
+/** An optional topscript. */
+@property (nonatomic, nullable) MTMathList* topScript;
 /** The font style to be used for the atom. */
 @property (nonatomic) MTFontStyle fontStyle;
 
@@ -248,6 +250,17 @@ typedef NS_ENUM(NSUInteger, MTFontStyle)
 
 /** An atom with a line over the contained math list. */
 @interface MTOverLine : MTMathAtom
+
+/// Creates an empty over
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
+/// The inner math list
+@property (nonatomic, nullable) MTMathList* innerList;
+
+@end
+
+/** An atom with a line over the contained math list. */
+@interface MTSet : MTMathAtom
 
 /// Creates an empty over
 - (instancetype)init NS_DESIGNATED_INITIALIZER;

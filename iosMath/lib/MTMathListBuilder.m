@@ -224,7 +224,7 @@ NSString *const MTParseError = @"ParseError";
                 return list;
             } else {
                 // Create a new table with the current list and a default env
-                MTMathAtom* table = [self buildTable:nil firstList:list row:NO];
+                MTMathAtom* table = [self buildTable:nil firstList:list alignments:nil row:NO];
                 return [MTMathList mathListWithAtoms:table, nil];
             }
         } else if (_spacesAllowed && ch == ' ') {
@@ -440,10 +440,10 @@ NSString *const MTParseError = @"ParseError";
         return accent;
     } else if ([command isEqualToString:@"sout"]) {
         // The cancel command has 1 arguments
-        MTCancelLine* over = [MTCancelLine new];
-        over.style = kMTCancelStyleOut;
-        over.innerList = [self buildInternal:true];
-        return over;
+        MTCancelLine* cancel = [MTCancelLine new];
+        cancel.style = kMTCancelStyleOut;
+        cancel.innerList = [self buildInternal:true];
+        return cancel;
     } else if ([command isEqualToString:@"mathrlap"]) {
         MTMathOverlap* lap = [MTMathOverlap new];
         lap.innerList = [self buildInternal:true];
@@ -495,6 +495,7 @@ NSString *const MTParseError = @"ParseError";
         MTInner* newInner = self.currentInnerAtom;
         self.currentInnerAtom = oldInner;
         return newInner;
+    } else if ([command isEqualToString:@"overset"]) {
     } else if ([command isEqualToString:@"overline"]) {
         // The overline command has 1 arguments
         MTOverLine* over = [MTOverLine new];
@@ -505,12 +506,21 @@ NSString *const MTParseError = @"ParseError";
         MTUnderLine* under = [MTUnderLine new];
         under.innerList = [self buildInternal:true];
         return under;
+    } else if ([command isEqualToString:@"hline"]) {
+        MTCancelLine* cancel = [MTCancelLine new];
+        return cancel;
     } else if ([command isEqualToString:@"begin"]) {
         NSString* env = [self readEnvironment];
         if (!env) {
             return nil;
         }
-        MTMathAtom* table = [self buildTable:env firstList:nil row:NO];
+        MTMathTable* table;
+        if ([env isEqualToString:@"array"]) {
+            NSString* alignments = [self readEnvironment];
+            table = [self buildTable:env firstList:nil alignments:alignments row:NO];
+        } else {
+            table = [self buildTable:env firstList:nil alignments:nil row:NO];
+        }
         return table;
     } else if ([command isEqualToString:@"color"]) {
         // A color command has 2 arguments
@@ -585,7 +595,7 @@ NSString *const MTParseError = @"ParseError";
             return list;
         } else {
             // Create a new table with the current list and a default env
-            MTMathAtom* table = [self buildTable:nil firstList:list row:YES];
+            MTMathAtom* table = [self buildTable:nil firstList:list alignments:nil row:YES];
             return [MTMathList mathListWithAtoms:table, nil];
         }
     } else if ([command isEqualToString:@"end"]) {
@@ -645,7 +655,7 @@ NSString *const MTParseError = @"ParseError";
     }
 }
 
-- (MTMathAtom*) buildTable:(NSString*) env firstList:(MTMathList*) firstList row:(BOOL) isRow
+- (MTMathAtom*) buildTable:(NSString*) env firstList:(MTMathList*) firstList alignments:(NSString*) alignments row:(BOOL) isRow
 {
     // Save the current env till an new one gets built.
     MTEnvProperties* oldEnv = _currentEnv;
@@ -683,7 +693,12 @@ NSString *const MTParseError = @"ParseError";
         return nil;
     }
     NSError* error;
-    MTMathAtom* table = [MTMathAtomFactory tableWithEnvironment:_currentEnv.envName rows:rows error:&error];
+    MTMathTable* table;
+    if ([_currentEnv.envName isEqualToString:@"array"] && alignments) {
+        table = [MTMathAtomFactory tableWithEnvironment:_currentEnv.envName alignments:alignments rows:rows error:&error];
+    } else {
+        table = [MTMathAtomFactory tableWithEnvironment:_currentEnv.envName rows:rows error:&error];
+    }
     if (!table && !_error) {
         _error = error;
         return nil;

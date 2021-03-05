@@ -269,6 +269,34 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
     return [self fractionWithNumerator:num denominator:denom];
 }
 
++ (nullable MTMathAtom *)tableWithEnvironment:(NSString *)env alignments:(NSString*) alignments rows:(NSArray<NSArray<MTMathList *> *> *)rows error:(NSError * _Nullable __autoreleasing *)error
+{
+    NSAssert([env isEqualToString:@"array"], @"Should be array to use alignments");
+    MTMathTable* table = [[MTMathTable alloc] initWithEnvironment:env];
+    for (int i = 0; i < rows.count; i++) {
+        NSArray<MTMathList*>* row = rows[i];
+        for (int j = 0; j < row.count; j++) {
+            [table setCell:row[j] forRow:i column:j];
+        }
+    }
+    NSInteger cols = table.numColumns;
+    MTColumnAlignment lastAlignment = kMTColumnAlignmentCenter;
+    for (int i = 0; i < cols; i++) {
+        if (i < [alignments length]) {
+            NSString* alignmentString = [alignments substringWithRange:NSMakeRange(i, 1)];
+            if ([alignmentString isEqualToString:@"l"]) {
+                lastAlignment = kMTColumnAlignmentLeft;
+            } else if ([alignmentString isEqualToString:@"c"]) {
+                lastAlignment = kMTColumnAlignmentCenter;
+            } else if ([alignmentString isEqualToString:@"r"]) {
+                lastAlignment = kMTColumnAlignmentRight;
+            }
+        }
+        [table setAlignment:lastAlignment forColumn:i];
+    }
+    return table;
+}
+
 + (nullable MTMathAtom *)tableWithEnvironment:(NSString *)env rows:(NSArray<NSArray<MTMathList *> *> *)rows error:(NSError * _Nullable __autoreleasing *)error
 {
     MTMathTable* table = [[MTMathTable alloc] initWithEnvironment:env];

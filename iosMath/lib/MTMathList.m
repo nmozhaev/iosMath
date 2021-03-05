@@ -525,6 +525,42 @@ static NSString* typeToText(MTMathAtomType type) {
 
 @end
 
+#pragma mark - MTSet
+
+@implementation MTSet
+
+- (instancetype)init
+{
+    self = [super initWithType:kMTMathAtomOrdinary value:@""];
+    return self;
+}
+
+- (instancetype)initWithType:(MTMathAtomType)type value:(NSString *)value
+{
+    if (type == kMTMathAtomOrdinary) {
+        return [self init];
+    }
+    @throw [NSException exceptionWithName:@"InvalidMethod"
+                                   reason:@"[MTSet initWithType:value:] cannot be called. Use [MTSet init] instead."
+                                 userInfo:nil];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MTOverLine* op = [super copyWithZone:zone];
+    op.innerList = [self.innerList copyWithZone:zone];
+    return op;
+}
+
+- (instancetype)finalized
+{
+    MTOverLine* newOverline = [super finalized];
+    newOverline.innerList = newOverline.innerList.finalized;
+    return newOverline;
+}
+
+@end
+
 #pragma mark - MTUnderline
 
 @implementation MTUnderLine

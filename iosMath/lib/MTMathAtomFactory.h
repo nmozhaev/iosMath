@@ -145,6 +145,7 @@ FOUNDATION_EXPORT NSString *const MTSymbolDegree;
  matrix environments are have builtin delimiters added to the table and hence are returned as inner atoms.
  */
 + (nullable MTMathAtom*) tableWithEnvironment:(nullable NSString*) env rows:(NSArray<NSArray<MTMathList*>*>*) rows error:(NSError**) error;
++ (nullable MTMathAtom*) tableWithEnvironment:(NSString *)env alignments:(NSString*) alignments rows:(NSArray<NSArray<MTMathList *> *> *)rows error:(NSError * _Nullable __autoreleasing *)error;
 @end
 
 NS_ASSUME_NONNULL_END

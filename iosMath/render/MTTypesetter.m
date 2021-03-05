@@ -881,6 +881,10 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                     }
                     [self makeScripts:atom display:line index:NSMaxRange(atom.indexRange) - 1 delta:delta];
                 }
+                if (atom.topScript) {
+                    MTCTLineDisplay* line = [self addDisplayLine];
+                    [self makeScripts:atom display:line index:NSMaxRange(atom.indexRange) - 1 delta:0];
+                }
                 break;
             }
         }
@@ -1620,7 +1624,7 @@ static const NSInteger kDelimiterShortfallPoints = 5;
 
 - (MTDisplay*) makeCancelLine:(MTCancelLine*) cancel
 {
-    MTMathListDisplay* innerListDisplay = [MTTypesetter createLineForMathList:cancel.innerList font:_font style:_style cramped:_cramped];
+    MTMathListDisplay* innerListDisplay = [MTTypesetter createLineForMathList:cancel.innerList font:_font style:_style cramped:YES];
     MTLineDisplay* lineDisplay = [[MTLineDisplay alloc] initWithInner:innerListDisplay position:_currentPosition range:cancel.indexRange];
     // Move the line down by the vertical gap.
     lineDisplay.lineShiftUp = innerListDisplay.ascent / 2;
@@ -1628,17 +1632,6 @@ static const NSInteger kDelimiterShortfallPoints = 5;
     lineDisplay.ascent = innerListDisplay.ascent;
     lineDisplay.descent = innerListDisplay.descent;
     lineDisplay.width = innerListDisplay.width;
-    CGSize innerSize = lineDisplay.inner.displayBounds.size;
-    switch(cancel.style) {
-        case kMTCancelStyleRight:
-            lineDisplay.start = CGPointMake(5, innerSize.height);
-            lineDisplay.end = CGPointMake(innerSize.width - 5, 0);
-            break;
-        case kMTCancelStyleLeft:
-            break;
-        default :
-            break;
-    }
     lineDisplay.insets = UIEdgeInsetsMake(0, 2.5, 0, 2.5);
     return lineDisplay;
 }

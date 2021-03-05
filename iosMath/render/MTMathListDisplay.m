@@ -795,9 +795,12 @@ static BOOL isIos6Supported() {
     MTBezierPath* path = [MTBezierPath bezierPath];
     CGPoint lineStart;
     CGPoint lineEnd;
-    if (CGPointEqualToPoint(_start, _end)) {
+    if (self.width == 0) {
+        lineStart = CGPointMake(0, 20);
+        lineEnd = CGPointMake(1000, 20);
+    } else if (CGPointEqualToPoint(_start, _end)) {
         lineStart = CGPointMake(self.position.x - self.insets.left, self.position.y + self.lineShiftUp);
-        lineEnd = CGPointMake(lineStart.x + self.inner.width + self.insets.right * 2, lineStart.y);
+        lineEnd = CGPointMake(lineStart.x + self.width + self.insets.right * 2, lineStart.y);
     } else {
         lineStart = _start;
         lineEnd = _end;
@@ -806,7 +809,6 @@ static BOOL isIos6Supported() {
     [path addLineToPoint:lineEnd];
     path.lineWidth = self.lineThickness;
     [path stroke];
-    
     CGContextRestoreGState(context);
 }
 

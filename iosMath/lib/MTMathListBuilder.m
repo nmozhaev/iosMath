@@ -495,7 +495,6 @@ NSString *const MTParseError = @"ParseError";
         MTInner* newInner = self.currentInnerAtom;
         self.currentInnerAtom = oldInner;
         return newInner;
-    } else if ([command isEqualToString:@"overset"]) {
     } else if ([command isEqualToString:@"overline"]) {
         // The overline command has 1 arguments
         MTOverLine* over = [MTOverLine new];

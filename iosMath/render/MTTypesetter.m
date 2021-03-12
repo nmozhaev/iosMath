@@ -12,6 +12,7 @@
 #import "MTFont+Internal.h"
 #import "MTMathListDisplayInternal.h"
 #import "MTUnicode.h"
+#import "MTFontManager.h"
 
 #pragma mark Inter Element Spacing
 
@@ -47,6 +48,8 @@ NSArray* getInterElementSpaces() {
 // Get's the index for the given type. If row is true, the index is for the row (i.e. left element) otherwise it is for the column (right element)
 NSUInteger getInterElementSpaceArrayIndexForType(MTMathAtomType type, BOOL row) {
     switch (type) {
+        case kMTMathAtomSet:
+        case kMTMathAtomSize:
         case kMTMathAtomColor:
         case kMTMathAtomOrdinary:
         case kMTMathAtomPlaceholder:   // A placeholder is treated as ordinary
@@ -63,8 +66,8 @@ NSUInteger getInterElementSpaceArrayIndexForType(MTMathAtomType type, BOOL row) 
             return 5;
         case kMTMathAtomPunctuation:
             return 6;
-        case kMTMathAtomFraction:  // Fraction and inner are treated the same.
-        case kMTMathAtomInner:
+        case kMTMathAtomFraction:
+        case kMTMathAtomInner: // Fraction and inner are treated the same.
             return 7;
         case kMTMathAtomRadical: {
             if (row) {
@@ -550,6 +553,8 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
             
         case kMTLineStyleScriptScript:
             return original * font.mathTable.scriptScriptScaleDown;
+        case kMTLineStyleTiny:
+            return original * 0.68;
     }
 }
 
@@ -628,7 +633,40 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 [_displayAtoms addObject:display];
                 break;
             }
-                
+            case kMTMathAtomSize: {
+                // stash the existing layout
+                if (_currentLine.length > 0) {
+                    [self addDisplayLine];
+                }
+                MTSize* size = (MTSize*) atom;
+                MTFont* updatedFont = [[MTFont alloc] initFontWithName:_font.fontName size:_font.fontSize * (size.style / 100.0)];
+                MTMathListDisplay* display = [MTTypesetter createLineForMathList:size.innerList font:updatedFont style:_style cramped:false];
+                display.position = _currentPosition;
+                [_displayAtoms addObject:display];
+                _currentPosition.x += display.width;
+                // add super scripts || subscripts
+                if (atom.subScript || atom.superScript) {
+                    [self makeScripts:atom display:display index:size.indexRange.location delta:0];
+                }
+                break;
+            }
+            case kMTMathAtomSet: {
+                // stash the existing layout
+                if (_currentLine.length > 0) {
+                    [self addDisplayLine];
+                }
+                MTSet* set = (MTSet*) atom;
+                MTMathListDisplay* display = [MTTypesetter createLineForMathList:set.innerList font:_font style:_style cramped:false];
+                _currentPosition.x += 5;
+                display.position = _currentPosition;
+                [_displayAtoms addObject:display];
+                _currentPosition.x += display.width + 5;
+                // add super scripts || subscripts
+                if (atom.subScript || atom.superScript) {
+                    [self makeScripts:atom display:display index:set.indexRange.location delta:0];
+                }
+                break;
+            }
             case kMTMathAtomRadical: {
                 // stash the existing layout
                 if (_currentLine.length > 0) {
@@ -1027,11 +1065,16 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
         
         subscriptShiftDown = fmax(subscriptShiftDown, _styleFont.mathTable.subscriptShiftDown);
         subscriptShiftDown = fmax(subscriptShiftDown, subscript.ascent - _styleFont.mathTable.subscriptTopMax);
-        // add the subscript
-        subscript.position = CGPointMake(_currentPosition.x, _currentPosition.y - subscriptShiftDown);
+        
+        if (atom.type == kMTMathAtomSet) {
+            subscript.position = CGPointMake(display.position.x + display.width / 2 - subscript.width / 2,
+                                             _currentPosition.y - subscriptShiftDown - 3);
+        } else {
+            subscript.position = CGPointMake(_currentPosition.x, _currentPosition.y - subscriptShiftDown);
+            _currentPosition.x += subscript.width + _styleFont.mathTable.spaceAfterScript;
+        }
         [_displayAtoms addObject:subscript];
         // update the position
-        _currentPosition.x += subscript.width + _styleFont.mathTable.spaceAfterScript;
         return;
     }
     
@@ -1042,10 +1085,15 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
     superScriptShiftUp = fmax(superScriptShiftUp, superScript.descent + _styleFont.mathTable.superscriptBottomMin);
     
     if (!atom.subScript) {
-        superScript.position = CGPointMake(_currentPosition.x, _currentPosition.y + superScriptShiftUp);
+        if (atom.type == kMTMathAtomSet) {
+            superScript.position = CGPointMake(display.position.x + display.width / 2 - superScript.width / 2,
+                                               _currentPosition.y + superScriptShiftUp + 3);
+        } else {
+            superScript.position = CGPointMake(_currentPosition.x, _currentPosition.y + superScriptShiftUp);
+            _currentPosition.x += superScript.width + _styleFont.mathTable.spaceAfterScript;
+        }
         [_displayAtoms addObject:superScript];
         // update the position
-        _currentPosition.x += superScript.width + _styleFont.mathTable.spaceAfterScript;
         return;
     }
     MTMathListDisplay* subscript = [MTTypesetter createLineForMathList:atom.subScript font:_font style:self.scriptStyle cramped:self.subscriptCramped];
@@ -1066,7 +1114,7 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
         }
     }
     // The delta is the italic correction above that shift superscript position
-    superScript.position = CGPointMake(_currentPosition.x + delta, _currentPosition.y + superScriptShiftUp);
+    superScript.position = CGPointMake(_currentPosition.x, _currentPosition.y + superScriptShiftUp);
     [_displayAtoms addObject:superScript];
     subscript.position = CGPointMake(_currentPosition.x, _currentPosition.y - subscriptShiftDown);
     [_displayAtoms addObject:subscript];

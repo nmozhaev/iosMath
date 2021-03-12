@@ -17,6 +17,7 @@
 @property (nonatomic, assign) CTFontRef ctFont;
 @property (nonatomic, strong) MTFontMathTable* mathTable;
 @property (nonatomic, strong) NSDictionary* rawMathTable;
+@property (nonatomic, strong) NSString* name;
 
 @end
 
@@ -29,7 +30,7 @@
         // CTFontCreateWithName does not load the complete math font, it only has about half the glyphs of the full math font.
         // In particular it does not have the math italic characters which breaks our variable rendering.
         // So we first load a CGFont from the file and then convert it to a CTFont.
-
+        self.name = name;
         NSBundle* bundle = [MTFont fontBundle];
         NSString* fontPath = [bundle pathForResource:name ofType:@"otf"];
         CGDataProviderRef fontDataProvider = CGDataProviderCreateWithFilename(fontPath.UTF8String);
@@ -99,6 +100,11 @@
 - (CGFloat)fontSize
 {
     return CTFontGetSize(self.ctFont);
+}
+
+- (NSString*)fontName
+{
+    return self.name;
 }
 
 - (void)dealloc

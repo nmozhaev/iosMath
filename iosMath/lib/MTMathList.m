@@ -531,13 +531,13 @@ static NSString* typeToText(MTMathAtomType type) {
 
 - (instancetype)init
 {
-    self = [super initWithType:kMTMathAtomOrdinary value:@""];
+    self = [super initWithType:kMTMathAtomSet value:@""];
     return self;
 }
 
 - (instancetype)initWithType:(MTMathAtomType)type value:(NSString *)value
 {
-    if (type == kMTMathAtomOrdinary) {
+    if (type == kMTMathAtomSet) {
         return [self init];
     }
     @throw [NSException exceptionWithName:@"InvalidMethod"
@@ -593,6 +593,43 @@ static NSString* typeToText(MTMathAtomType type) {
     MTUnderLine* newUnderline = [super finalized];
     newUnderline.innerList = newUnderline.innerList.finalized;
     return newUnderline;
+}
+
+@end
+
+#pragma mark - MTSize
+
+@implementation MTSize
+
+- (instancetype)initWithValue:(NSString *)value
+{
+    self = [super initWithType:kMTMathAtomSize value:value];
+    return self;
+}
+
+- (instancetype)initWithType:(MTMathAtomType)type value:(NSString *)value
+{
+    if (type == kMTMathAtomSize) {
+        return [self initWithValue:value];
+    }
+    @throw [NSException exceptionWithName:@"InvalidMethod"
+                                   reason:@"[MTSize initWithType:value:] cannot be called. Use [MTSize initWithValue:] instead."
+                                 userInfo:nil];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MTSize* op = [super copyWithZone:zone];
+    op.style = self.style;
+    op.innerList = [self.innerList copyWithZone:zone];
+    return op;
+}
+
+- (instancetype)finalized
+{
+    MTSize* newSize = [super finalized];
+    newSize.innerList = newSize.innerList.finalized;
+    return newSize;
 }
 
 @end

@@ -434,10 +434,24 @@ NSString *const MTParseError = @"ParseError";
         return atom;
     }
     MTAccent* accent = [MTMathAtomFactory accentWithName:command];
+    MTSize* size = [MTMathAtomFactory sizeWithName:command];
     if (accent) {
         // The command is an accent
         accent.innerList = [self buildInternal:true];
         return accent;
+    } else if (size) {
+        size.innerList = [self buildInternal:false];
+        return size;
+    } else if ([command isEqualToString:@"overset"]) {
+        MTSet* set = [MTSet new];
+        set.superScript = [self buildInternal:true];
+        set.innerList = [self buildInternal:true];
+        return set;
+    } else if ([command isEqualToString:@"underset"]) {
+        MTSet* set = [MTSet new];
+        set.subScript = [self buildInternal:true];
+        set.innerList = [self buildInternal:true];
+        return set;
     } else if ([command isEqualToString:@"sout"]) {
         // The cancel command has 1 arguments
         MTCancelLine* cancel = [MTCancelLine new];

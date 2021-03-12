@@ -185,6 +185,19 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
     }
 }
 
++ (nullable MTSize*) sizeWithName:(NSString*) sizeName
+{
+    NSDictionary<NSString*, NSNumber*> *sizes = [MTMathAtomFactory sizes];
+    NSNumber* sizeValue = sizes[sizeName];
+    if (sizeValue) {
+        MTSize* size = [[MTSize alloc] initWithValue:sizeName];
+        size.style = sizeValue.unsignedIntegerValue;
+        return size;
+    } else {
+        return nil;
+    }
+}
+
 +(NSString*) accentName:(MTAccent*) accent
 {
     NSDictionary* dict = [MTMathAtomFactory accentValueToName];
@@ -749,6 +762,26 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
         }
     }
     return textToCommands;
+}
+
++ (NSDictionary<NSString*, NSNumber*>*) sizes
+{
+    static NSDictionary* sizes = nil;
+    if (!sizes) {
+        sizes = @{
+            @"tiny" : [[NSNumber alloc] initWithInteger:kMTSizeStyleTiny],
+            @"scriptsize" : [[NSNumber alloc] initWithInteger:kMTSizeStyleScript],
+            @"footnotesize" : [[NSNumber alloc] initWithInteger:kMTSizeStyleFootnote],
+            @"small" : [[NSNumber alloc] initWithInteger:kMTSizeStyleSmall],
+            @"normalsize" : [[NSNumber alloc] initWithInteger:kMTSizeStyleNormal],
+            @"large" : [[NSNumber alloc] initWithInteger:kMTSizeStylelarge],
+            @"Large" : [[NSNumber alloc] initWithInteger:kMTSizeStyleLarge],
+            @"LARGE" : [[NSNumber alloc] initWithInteger:kMTSizeStyleLARGE],
+            @"huge" : [[NSNumber alloc] initWithInteger:kMTSizeStylehuge],
+            @"Huge" : [[NSNumber alloc] initWithInteger:kMTSizeStyleHuge]
+        };
+    }
+    return sizes;
 }
 
 + (NSDictionary<NSString*, NSString*>*) accents

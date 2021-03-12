@@ -105,6 +105,8 @@ FOUNDATION_EXPORT NSString *const MTSymbolDegree;
  */
 + (nullable MTAccent*) accentWithName:(NSString*) accentName;
 
++ (nullable MTSize*) sizeWithName:(NSString*) sizeName;
+
 /** Returns the accent name for the given accent. This is the reverse of the above
  function. */
 +(NSString*) accentName:(MTAccent*) accent;

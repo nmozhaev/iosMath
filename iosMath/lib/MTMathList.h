@@ -60,6 +60,7 @@ typedef NS_ENUM(NSUInteger, MTMathAtomType)
     kMTMathAtomCancelline,
     /// An accented atom - Accent in TeX
     kMTMathAtomAccent,
+    kMTMathAtomSet,
     
     // Atoms after this point do not support subscripts or superscripts
     
@@ -75,6 +76,7 @@ typedef NS_ENUM(NSUInteger, MTMathAtomType)
     /// Denotes style changes during rendering.
     kMTMathAtomStyle,
     kMTMathAtomColor,
+    kMTMathAtomSize,
     
     kMTMathAtomOverlap,
     
@@ -259,13 +261,44 @@ typedef NS_ENUM(NSUInteger, MTFontStyle)
 
 @end
 
-/** An atom with a line over the contained math list. */
-@interface MTSet : MTMathAtom
+@interface MTSize : MTMathAtom
 
-/// Creates an empty over
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
+typedef NS_ENUM(NSUInteger, MTSizeStyle)
+{
+    kMTSizeStyleTiny = 68,
+    kMTSizeStyleScript = 80,
+    kMTSizeStyleFootnote = 85,
+    kMTSizeStyleSmall = 92,
+    kMTSizeStyleNormal = 100,
+    kMTSizeStylelarge = 117,
+    kMTSizeStyleLarge = 141,
+    kMTSizeStyleLARGE = 158,
+    kMTSizeStylehuge = 190,
+    kMTSizeStyleHuge = 228
+};
 
 /// The inner math list
+@property (nonatomic, nullable) MTMathList* innerList;
+@property (nonatomic) MTSizeStyle style;
+
+- (instancetype)initWithValue:(NSString*) value NS_DESIGNATED_INITIALIZER;
+
+@end
+
+/** An atom with an atom over or under the contained math list. */
+@interface MTSet : MTMathAtom
+
+typedef NS_ENUM(NSUInteger, MTSetStyle)
+{
+    kMTSetStyleOver = 0,
+    kMTSetStyleUnder
+};
+
+/// Creates an empty set
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
+@property (nonatomic) MTSetStyle style;
+
 @property (nonatomic, nullable) MTMathList* innerList;
 
 @end
@@ -340,7 +373,10 @@ typedef NS_ENUM(unsigned int, MTLineStyle)  {
     /// Script style (for sub/super scripts)
     kMTLineStyleScript,
     /// Script script style (for scripts of scripts)
-    kMTLineStyleScriptScript
+    kMTLineStyleScriptScript,
+    
+    kMTLineStyleTiny
+    
 };
 
 /** An atom representing a style change.

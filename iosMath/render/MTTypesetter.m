@@ -553,8 +553,6 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
             
         case kMTLineStyleScriptScript:
             return original * font.mathTable.scriptScriptScaleDown;
-        case kMTLineStyleTiny:
-            return original * 0.68;
     }
 }
 

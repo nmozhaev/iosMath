@@ -373,9 +373,7 @@ typedef NS_ENUM(unsigned int, MTLineStyle)  {
     /// Script style (for sub/super scripts)
     kMTLineStyleScript,
     /// Script script style (for scripts of scripts)
-    kMTLineStyleScriptScript,
-    
-    kMTLineStyleTiny
+    kMTLineStyleScriptScript
     
 };
 

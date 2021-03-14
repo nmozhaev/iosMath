@@ -74,6 +74,10 @@ static NSString* typeToText(MTMathAtomType type) {
             return @"Cancelline";
         case kMTMathAtomOverlap:
             return @"Overlap";
+        case kMTMathAtomSize:
+            return @"Size";
+        case kMTMathAtomSet:
+            return @"Set";
     }
 }
 

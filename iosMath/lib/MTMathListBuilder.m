@@ -441,6 +441,7 @@ NSString *const MTParseError = @"ParseError";
         return accent;
     } else if (size) {
         size.innerList = [self buildInternal:false];
+        _currentChar--;
         return size;
     } else if ([command isEqualToString:@"overset"]) {
         MTSet* set = [MTSet new];

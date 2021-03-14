@@ -1068,7 +1068,7 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
         
         if (atom.type == kMTMathAtomSet) {
             subscript.position = CGPointMake(display.position.x + display.width / 2 - subscript.width / 2,
-                                             _currentPosition.y - subscriptShiftDown - 3);
+                                             _currentPosition.y - subscriptShiftDown - 5);
         } else {
             subscript.position = CGPointMake(_currentPosition.x, _currentPosition.y - subscriptShiftDown);
             _currentPosition.x += subscript.width + _styleFont.mathTable.spaceAfterScript;
@@ -1087,7 +1087,7 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
     if (!atom.subScript) {
         if (atom.type == kMTMathAtomSet) {
             superScript.position = CGPointMake(display.position.x + display.width / 2 - superScript.width / 2,
-                                               _currentPosition.y + superScriptShiftUp + 3);
+                                               _currentPosition.y + superScriptShiftUp + 5);
         } else {
             superScript.position = CGPointMake(_currentPosition.x, _currentPosition.y + superScriptShiftUp);
             _currentPosition.x += superScript.width + _styleFont.mathTable.spaceAfterScript;

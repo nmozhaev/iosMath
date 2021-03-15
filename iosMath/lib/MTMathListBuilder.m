@@ -440,7 +440,7 @@ NSString *const MTParseError = @"ParseError";
         accent.innerList = [self buildInternal:true];
         return accent;
     } else if (size) {
-        size.innerList = [self buildInternal:false];
+        size.innerList = [self buildInternal:false stopChar:'}'];
         _currentChar--;
         return size;
     } else if ([command isEqualToString:@"overset"]) {

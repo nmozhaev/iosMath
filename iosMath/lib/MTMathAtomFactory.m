@@ -692,11 +692,17 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
                      
                      // Spacing
                      @"," : [[MTMathSpace alloc] initWithSpace:3],
+                     @"thinspace" : [[MTMathSpace alloc] initWithSpace:3],
                      @">" : [[MTMathSpace alloc] initWithSpace:4],
+                     @":" : [[MTMathSpace alloc] initWithSpace:4],
+                     @"medspace" : [[MTMathSpace alloc] initWithSpace:4],
                      @";" : [[MTMathSpace alloc] initWithSpace:5],
-                     @"!" : [[MTMathSpace alloc] initWithSpace:-3],
+                     @"thickspace" : [[MTMathSpace alloc] initWithSpace:5],
+                     @"enspace" : [[MTMathSpace alloc] initWithSpace:9],
                      @"quad" : [[MTMathSpace alloc] initWithSpace:18],  // quad = 1em = 18mu
                      @"qquad" : [[MTMathSpace alloc] initWithSpace:36], // qquad = 2em
+                     @"!" : [[MTMathSpace alloc] initWithSpace:-3],
+                     
                      
                      // Style
                      @"displaystyle" : [[MTMathStyle alloc] initWithStyle:kMTLineStyleDisplay],

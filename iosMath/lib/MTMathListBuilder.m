@@ -410,6 +410,39 @@ NSString *const MTParseError = @"ParseError";
     return env;
 }
 
+- (NSNumber*) readDistance
+{
+    if (![self expectCharacter:'{']) {
+        // We didn't find an opening brace, so no env found.
+        [self setError:MTParseErrorCharacterNotFound message:@"Missing {"];
+        return nil;
+    }
+    
+    // Ignore spaces and nonascii.
+    [self skipSpaces];
+    
+    NSMutableString* mutable = [NSMutableString string];
+    while([self hasCharacters]) {
+        unichar ch = [self getNextCharacter];
+        if (ch != '}') {
+            [mutable appendString:[NSString stringWithCharacters:&ch length:1]];
+        } else {
+            break;
+        }
+    }
+    mutable = [mutable stringByReplacingOccurrencesOfString:@"em" withString:@""];
+    return mutable;
+    
+    if (![self expectCharacter:'}']) {
+        // We didn't find an closing brace, so invalid format.
+        [self setError:MTParseErrorCharacterNotFound message:@"Missing }"];
+        return nil;
+    }
+    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+    formatter.numberStyle = NSNumberFormatterDecimalStyle;
+    return [formatter numberFromString:mutable];
+}
+
 - (MTMathAtom*) getBoundaryAtom:(NSString*) delimiterType
 {
     NSString* delim = [self readDelimiter];
@@ -441,8 +474,11 @@ NSString *const MTParseError = @"ParseError";
         return accent;
     } else if (size) {
         size.innerList = [self buildInternal:false stopChar:'}'];
-        _currentChar--;
+        [self unlookCharacter];
         return size;
+    } else if ([command isEqualToString:@"kern"]) {
+        NSNumber* environment = [self readDistance];
+        return [[MTMathSpace alloc] initWithSpace:environment.floatValue * 18.0];
     } else if ([command isEqualToString:@"overset"]) {
         MTSet* set = [MTSet new];
         set.superScript = [self buildInternal:true];

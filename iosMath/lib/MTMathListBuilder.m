@@ -477,8 +477,8 @@ NSString *const MTParseError = @"ParseError";
         [self unlookCharacter];
         return size;
     } else if ([command isEqualToString:@"kern"]) {
-        NSNumber* environment = [self readDistance];
-        return [[MTMathSpace alloc] initWithSpace:environment.floatValue * 18.0];
+        NSNumber* distance = [self readDistance];
+        return [[MTMathSpace alloc] initWithSpace:distance.floatValue * 18.0];
     } else if ([command isEqualToString:@"phantom"]) {
         MTMathColor* mathColor = [[MTMathColor alloc] init];
         mathColor.colorString = @"#00000000";

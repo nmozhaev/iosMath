@@ -51,6 +51,7 @@ NSUInteger getInterElementSpaceArrayIndexForType(MTMathAtomType type, BOOL row) 
         case kMTMathAtomSet:
         case kMTMathAtomSize:
         case kMTMathAtomColor:
+        case kMTMathAtomOverlap:
         case kMTMathAtomOrdinary:
         case kMTMathAtomPlaceholder:   // A placeholder is treated as ordinary
             return 0;

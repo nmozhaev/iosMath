@@ -479,6 +479,11 @@ NSString *const MTParseError = @"ParseError";
     } else if ([command isEqualToString:@"kern"]) {
         NSNumber* environment = [self readDistance];
         return [[MTMathSpace alloc] initWithSpace:environment.floatValue * 18.0];
+    } else if ([command isEqualToString:@"phantom"]) {
+        MTMathColor* mathColor = [[MTMathColor alloc] init];
+        mathColor.colorString = @"#00000000";
+        mathColor.innerList = [self buildInternal:true];
+        return mathColor;
     } else if ([command isEqualToString:@"overset"]) {
         MTSet* set = [MTSet new];
         set.superScript = [self buildInternal:true];

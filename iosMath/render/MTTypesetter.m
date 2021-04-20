@@ -70,6 +70,8 @@ NSUInteger getInterElementSpaceArrayIndexForType(MTMathAtomType type, BOOL row) 
         case kMTMathAtomFraction:
         case kMTMathAtomInner: // Fraction and inner are treated the same.
             return 7;
+        case kMTMathAtomTable:
+            return 8;
         case kMTMathAtomRadical: {
             if (row) {
                 // Radicals have inter element spaces only when on the left side.
@@ -846,13 +848,17 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 }
                 // We will consider tables as inner
                 [self addInterElementSpace:prevNode currentType:kMTMathAtomInner];
-                atom.type = kMTMathAtomInner;
+                atom.type = kMTMathAtomTable;
                 
                 MTMathTable* table = (MTMathTable*) atom;
                 MTDisplay* display = [self makeTable:table];
                 [_displayAtoms addObject:display];
                 _currentPosition.x += display.width;
                 // A table doesn't have subscripts or superscripts
+                
+                CGFloat interElementSpace = getInterElementSpaceArrayIndexForType(atom.type, true);
+                // increase the space
+                _currentPosition.x += interElementSpace * 2;
                 break;
             }
                 
@@ -1923,6 +1929,10 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
     CGFloat prevRowDescent = 0;
     CGFloat ascent = 0;
     BOOL first = true;
+    CGFloat maxHeight = rows[0].displayBounds.size.height;
+    for (MTDisplay *row in rows)
+        if (row.displayBounds.size.height > maxHeight)
+            maxHeight = row.displayBounds.size.height;
     for (MTDisplay* row in rows) {
         if (first) {
             row.position = CGPointZero;
@@ -1935,7 +1945,11 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
                 skip = prevRowDescent + row.ascent + lineSkip;
             }
             // We are going down so we decrease the y value.
-            currPos -= skip;
+            if (row.displayBounds.size.height == 0) {
+                currPos -= maxHeight;
+            } else {
+                currPos -= skip;
+            }
             row.position = CGPointMake(0, currPos);
         }
         prevRowDescent = row.descent;

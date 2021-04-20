@@ -400,7 +400,16 @@ NSString *const MTParseError = @"ParseError";
     
     // Ignore spaces and nonascii.
     [self skipSpaces];
-    NSString* env = [self readString];
+    NSMutableString* env = [NSMutableString string];
+    while([self hasCharacters]) {
+        unichar ch = [self getNextCharacter];
+        if (ch != '}') {
+            [env appendString:[NSString stringWithCharacters:&ch length:1]];
+        } else {
+            [self unlookCharacter];
+            break;
+        }
+    }
     
     if (![self expectCharacter:'}']) {
         // We didn't find an closing brace, so invalid format.
@@ -427,11 +436,11 @@ NSString *const MTParseError = @"ParseError";
         if (ch != '}') {
             [mutable appendString:[NSString stringWithCharacters:&ch length:1]];
         } else {
+            [self unlookCharacter];
             break;
         }
     }
     mutable = [mutable stringByReplacingOccurrencesOfString:@"em" withString:@""];
-    return mutable;
     
     if (![self expectCharacter:'}']) {
         // We didn't find an closing brace, so invalid format.

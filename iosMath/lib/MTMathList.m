@@ -283,6 +283,12 @@ static NSString* typeToText(MTMathAtomType type) {
     return self;
 }
 
+- (void)setClearance:(CGFloat)clearance
+{
+    _clearance = clearance;
+    _hasClearance = true;
+}
+
 - (NSString *)stringValue
 {
     NSMutableString* str = [[NSMutableString alloc] init];
@@ -311,6 +317,8 @@ static NSString* typeToText(MTMathAtomType type) {
     frac.numerator = [self.numerator copyWithZone:zone];
     frac.denominator = [self.denominator copyWithZone:zone];
     frac->_hasRule = self.hasRule;
+    frac.hasClearance = self.hasClearance;
+    frac.clearance = self.clearance;
     frac.leftDelimiter = [self.leftDelimiter copyWithZone:zone];
     frac.rightDelimiter = [self.rightDelimiter copyWithZone:zone];
     return frac;

@@ -348,7 +348,7 @@ NSString *const MTParseError = @"ParseError";
 {
     static NSSet<NSNumber*>* singleCharCommands = nil;
     if (!singleCharCommands) {
-        NSArray* singleChars = @[ @'{', @'}', @'$', @'#', @'%', @'_', @'|', @' ', @',', @'>', @';', @'!', @'\\' ];
+        NSArray* singleChars = @[ @'{', @'}', @'$', @'#', @'%', @'_', @'|', @' ', @',', @':', @'>', @';', @'!', @'\\' ];
         singleCharCommands = [[NSSet alloc] initWithArray:singleChars];
     }
     if ([self hasCharacters]) {
@@ -510,10 +510,20 @@ NSString *const MTParseError = @"ParseError";
         cancel.innerList = [self buildInternal:true];
         return cancel;
     } else if ([command isEqualToString:@"mathrlap"]) {
-        MTMathOverlap* lap = [MTMathOverlap new];
-        lap.innerList = [self buildInternal:true];
-        lap.overlapList = [self buildInternal:true];
-        return lap;
+        MTMathOverlap* overlap = [MTMathOverlap new];
+        overlap.overlapList = [self buildInternal:true];
+        BOOL haveInnerList = [self getNextCharacter] == '{';
+        [self unlookCharacter];
+        if (haveInnerList) {
+            overlap.innerList = [self buildInternal:true];
+        }
+        return overlap;
+    } else if ([command isEqualToString:@"raisebox"]) {
+        // A fraction command has 2 arguments
+        MTFraction* frac = [[MTFraction alloc] initWithRule:false];
+        frac.clearance = ([[self readDistance] floatValue] - 1.25) * 18;
+        frac.numerator = [self buildInternal:true];
+        return frac;
     } else if ([command isEqualToString:@"frac"]) {
         // A fraction command has 2 arguments
         MTFraction* frac = [MTFraction new];

@@ -736,12 +736,16 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 if (_currentLine.length > 0) {
                     [self addDisplayLine];
                 }
+                [self addInterElementSpace:prevNode currentType:kMTMathAtomOrdinary];
                 MTMathOverlap* overlap = (MTMathOverlap*) atom;
-                MTMathListDisplay* innerDisplay = [MTTypesetter createLineForMathList:overlap.innerList font:_font style:_style cramped:false];
-                MTMathListDisplay* overlapDisplay = [MTTypesetter createLineForMathList:overlap.overlapList font:_font style:_style cramped:false];
+                atom.type = kMTMathAtomOverlap;
+                MTMathListDisplay* innerDisplay = [MTTypesetter createLineForMathList:overlap.innerList font:_font style:_style cramped:_cramped];
+                innerDisplay.position = _currentPosition;
+                MTMathListDisplay* overlapDisplay = [MTTypesetter createLineForMathList:overlap.overlapList font:_font style:_style cramped:_cramped];
+                overlapDisplay.position = _currentPosition;
                 [_displayAtoms addObject:innerDisplay];
                 [_displayAtoms addObject:overlapDisplay];
-                _currentPosition.x += MAX(innerDisplay.width, overlapDisplay.width);
+                _currentPosition.x += innerDisplay.width;
                 break;
             }
                 
@@ -1235,13 +1239,18 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
             denominatorShiftDown += (minDenominatorGap - distanceFromDenominatorToBar);
         }
     } else {
-        // This is the distance between the numerator and the denominator
-        CGFloat clearance = (numeratorShiftUp - numeratorDisplay.descent) - (denominatorDisplay.ascent - denominatorShiftDown);
-        // This is the minimum clearance between the numerator and denominator.
-        CGFloat minGap = self.stackGapMin;
-        if (clearance < minGap) {
-            numeratorShiftUp += (minGap - clearance)/2;
-            denominatorShiftDown += (minGap - clearance)/2;
+        if (frac.hasClearance) {
+            numeratorShiftUp += frac.clearance * _styleFont.mathTable.muUnit / 2;
+            denominatorShiftDown += frac.clearance * _styleFont.mathTable.muUnit / 2;
+        } else {
+            // This is the distance between the numerator and the denominator
+            CGFloat clearance = (numeratorShiftUp - numeratorDisplay.descent) - (denominatorDisplay.ascent - denominatorShiftDown);
+            // This is the minimum clearance between the numerator and denominator.
+            CGFloat minGap = self.stackGapMin;
+            if (clearance < minGap) {
+                numeratorShiftUp += (minGap - clearance) / 2;
+                denominatorShiftDown += (minGap - clearance) / 2;
+            }
         }
     }
     

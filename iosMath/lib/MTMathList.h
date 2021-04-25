@@ -200,6 +200,9 @@ typedef NS_ENUM(NSUInteger, MTFontStyle)
 /** An optional delimiter for a fraction on the right. */
 @property (nonatomic, nullable) NSString* rightDelimiter;
 
+@property (nonatomic) BOOL hasClearance;
+@property (nonatomic) CGFloat clearance;
+
 @end
 
 /** An atom of type radical (square root). */

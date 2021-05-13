@@ -56,8 +56,9 @@ typedef NS_ENUM(NSUInteger, MTMathAtomType)
     kMTMathAtomUnderline,
     /// An overlined atom - Over in TeX
     kMTMathAtomOverline,
-    /// An crosslined atom - Cancel in Tex
+    /// A crosslined atom - Cancel in Tex
     kMTMathAtomCancelline,
+    kMTMathLine,
     /// An accented atom - Accent in TeX
     kMTMathAtomAccent,
     kMTMathAtomSet,
@@ -306,6 +307,17 @@ typedef NS_ENUM(NSUInteger, MTSetStyle)
 
 @end
 
+/** An atom contained info for a line */
+@interface MTLine : MTMathAtom
+
+/// Creates an empty over
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
+@property (nonatomic) CGPoint start;
+@property (nonatomic) CGPoint end;
+
+@end
+
 /** An atom with a line cross the contained math list. */
 @interface MTCancelLine : MTMathAtom
 
@@ -438,6 +450,13 @@ typedef NS_ENUM(NSInteger, MTColumnAlignment) {
     kMTColumnAlignmentRight,
 };
 
+typedef NS_ENUM(NSInteger, MTLineType) {
+    /// Simple line
+    kMTLine,
+    /// Dashed line
+    kMTDashedLine
+};
+
 /// Creates an empty table with a nil environment
 - (instancetype)init;
 
@@ -447,6 +466,9 @@ typedef NS_ENUM(NSInteger, MTColumnAlignment) {
 /// The alignment for each column (left, right, center). The default alignment
 /// for a column (if not set) is center.
 @property (nonatomic, nonnull, readonly) NSArray<NSNumber*>* alignments;
+
+@property (nonatomic, nonnull) NSString* alignmentString;
+
 /// The cells in the table as a two dimensional array.
 @property (nonatomic, nonnull, readonly) NSArray<NSArray<MTMathList*>*>* cells;
 /// The name of the environment that this table denotes.

@@ -777,6 +777,17 @@ static BOOL isIos6Supported() {
     return self;
 }
 
+- (instancetype)initWithStart:(CGPoint)start end:(CGPoint)end
+{
+    self = [super init];
+    if (self) {
+        self.start = start;
+        self.end = end;
+        self.insets = UIEdgeInsetsZero;
+    }
+    return self;
+}
+
 - (void)setTextColor:(MTColor *)textColor
 {
     [super setTextColor:textColor];
@@ -785,7 +796,9 @@ static BOOL isIos6Supported() {
 
 - (void)draw:(CGContextRef)context
 {
-    [self.inner draw:context];
+    if (self.inner) {
+        [self.inner draw:context];
+    }
     
     CGContextSaveGState(context);
     
@@ -795,15 +808,12 @@ static BOOL isIos6Supported() {
     MTBezierPath* path = [MTBezierPath bezierPath];
     CGPoint lineStart;
     CGPoint lineEnd;
-    if (self.width == 0) {
-        lineStart = CGPointMake(0, 20);
-        lineEnd = CGPointMake(1000, 20);
-    } else if (CGPointEqualToPoint(_start, _end)) {
-        lineStart = CGPointMake(self.position.x - self.insets.left, self.position.y + self.lineShiftUp);
+    if (CGPointEqualToPoint(_start, _end)) {
+        lineStart = CGPointMake(self.position.x - self.insets.left, self.position.y + self.lineShiftUp + self.insets.top - self.insets.bottom);
         lineEnd = CGPointMake(lineStart.x + self.width + self.insets.right * 2, lineStart.y);
     } else {
-        lineStart = _start;
-        lineEnd = _end;
+        lineStart = CGPointMake(_start.x - self.insets.left, _start.y + self.insets.top - self.insets.bottom);
+        lineEnd = CGPointMake(_end.x + self.insets.left + self.insets.right, _end.y + self.insets.top - self.insets.bottom);
     }
     [path moveToPoint:lineStart];
     [path addLineToPoint:lineEnd];
@@ -820,7 +830,9 @@ static BOOL isIos6Supported() {
 
 - (void) updateInnerPosition
 {
-    self.inner.position = CGPointMake(self.position.x, self.position.y);
+    if (self.inner) {
+        self.inner.position = CGPointMake(self.position.x, self.position.y);
+    }
 }
 
 @end

@@ -161,6 +161,7 @@ typedef NS_ENUM(unsigned int, MTLinePosition)  {
 @interface MTLineDisplay : MTDisplay
 
 - (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithStart:(CGPoint)start end:(CGPoint)end;
 
 /** A display representing the inner list that is underlined. It's position is relative
  to the parent is not treated as a sub-display.

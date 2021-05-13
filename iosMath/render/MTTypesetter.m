@@ -23,6 +23,7 @@ typedef NS_ENUM(int, MTInterElementSpaceType) {
     kMTSpaceNSThin,    // Thin but not in script mode
     kMTSpaceNSMedium,
     kMTSpaceNSThick,
+    kMTSpaceEnspace
 };
 
 
@@ -39,7 +40,7 @@ NSArray* getInterElementSpaces() {
            @[@(kMTSpaceNone),     @(kMTSpaceThin),     @(kMTSpaceNSMedium), @(kMTSpaceNSThick), @(kMTSpaceNone),     @(kMTSpaceNone),    @(kMTSpaceNone),    @(kMTSpaceNSThin)],    // close
            @[@(kMTSpaceNSThin),   @(kMTSpaceNSThin),   @(kMTSpaceInvalid),  @(kMTSpaceNSThin),  @(kMTSpaceNSThin),   @(kMTSpaceNSThin),  @(kMTSpaceNSThin),  @(kMTSpaceNSThin)],    // punct
            @[@(kMTSpaceNSThin),   @(kMTSpaceThin),     @(kMTSpaceNSMedium), @(kMTSpaceNSThick), @(kMTSpaceNSThin),   @(kMTSpaceNone),    @(kMTSpaceNSThin),  @(kMTSpaceNSThin)],    // fraction
-           @[@(kMTSpaceNSMedium), @(kMTSpaceNSThin),   @(kMTSpaceNSMedium), @(kMTSpaceNSThick), @(kMTSpaceNone),     @(kMTSpaceNone),    @(kMTSpaceNone),    @(kMTSpaceNSThin)]];   // radical
+           @[@(kMTSpaceNSMedium), @(kMTSpaceNSThin),   @(kMTSpaceNSMedium), @(kMTSpaceNSThick), @(kMTSpaceNone),     @(kMTSpaceNone),    @(kMTSpaceNone),    @(kMTSpaceEnspace)]];   // radical
     }
     return interElementSpaceArray;
 }
@@ -53,8 +54,11 @@ NSUInteger getInterElementSpaceArrayIndexForType(MTMathAtomType type, BOOL row) 
         case kMTMathAtomColor:
         case kMTMathAtomOverlap:
         case kMTMathAtomOrdinary:
+        case kMTMathAtomOverline:
+        case kMTMathAtomCancelline:
         case kMTMathAtomPlaceholder:   // A placeholder is treated as ordinary
             return 0;
+        case kMTMathLine:
         case kMTMathAtomLargeOperator:
             return 1;
         case kMTMathAtomBinaryOperator:
@@ -710,15 +714,29 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 }
                 break;
             }
+            case kMTMathLine: {
+                if (_currentLine.length > 0) {
+                    [self addDisplayLine];
+                }
+                [self addInterElementSpace:prevNode currentType:kMTMathLine];
+                atom.type = kMTMathLine;
                 
+                MTLine* line = (MTLine *)atom;
+                MTLineDisplay* display = [[MTLineDisplay alloc] initWithStart:CGPointMake(line.start.x, _currentPosition.y)
+                                                                          end:CGPointMake(-line.end.x, _currentPosition.y)];
+                display.lineThickness = 0.5;
+                
+                [_displayAtoms addObject:display];
+                break;
+            }
             case kMTMathAtomCancelline: {
                 // stash the existing layout
                 if (_currentLine.length > 0) {
                     [self addDisplayLine];
                 }
                 
-                [self addInterElementSpace:prevNode currentType:kMTMathAtomOrdinary];
-                atom.type = kMTMathAtomOrdinary;
+                [self addInterElementSpace:prevNode currentType:kMTMathAtomCancelline];
+                atom.type = kMTMathAtomCancelline;
                 
                 MTCancelLine* cancel = (MTCancelLine*) atom;
                 MTDisplay* display = [self makeCancelLine:cancel];
@@ -810,8 +828,8 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                     [self addDisplayLine];
                 }
                 // Overline is considered as Ord in rule 16.
-                [self addInterElementSpace:prevNode currentType:kMTMathAtomOrdinary];
-                atom.type = kMTMathAtomOrdinary;
+                [self addInterElementSpace:prevNode currentType:kMTMathAtomOverline];
+                atom.type = kMTMathAtomOverline;
                 
                 MTOverLine* over = (MTOverLine*) atom;
                 MTDisplay* display = [self makeOverline:over];
@@ -862,7 +880,7 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                 
                 CGFloat interElementSpace = getInterElementSpaceArrayIndexForType(atom.type, true);
                 // increase the space
-                _currentPosition.x += interElementSpace * 2;
+                _currentPosition.x += interElementSpace;
                 break;
             }
                 
@@ -988,6 +1006,8 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
             
         case kMTSpaceNSThick:
             return (_style < kMTLineStyleScript) ? 5 : 0;
+        case kMTSpaceEnspace:
+            return (_style < kMTLineStyleScript) ? 9 : 0;
     }
 }
 
@@ -1859,15 +1879,35 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
     NSArray<NSArray<MTDisplay*>*>* displays = [self typesetCells:table columnWidths:columnWidths];
     
     // Position all the columns in each row
-    NSMutableArray<MTDisplay*>* rowDisplays = [NSMutableArray arrayWithCapacity:table.cells.count];
-    for (NSArray<MTDisplay*>* row in displays) {
-        MTMathListDisplay* rowDisplay = [self makeRowWithColumns:row forTable:table columnWidths:columnWidths];
-        [rowDisplays addObject:rowDisplay];
-    }
+    NSMutableArray<MTDisplay*>* rowDisplays = [[NSMutableArray alloc] init];
     
+    for (NSArray<MTDisplay*>* row in displays) {
+        if ([row count] == 1 && [[row firstObject] isKindOfClass:[MTLineDisplay class]]) {
+            [rowDisplays addObject:[row firstObject]];
+        } else {
+            MTMathListDisplay* rowDisplay = [self makeRowWithColumns:row forTable:table columnWidths:columnWidths];
+            [rowDisplays addObject:rowDisplay];
+        }
+    }
     // Position all the rows
     [self positionRows:rowDisplays forTable:table];
     MTMathListDisplay* tableDisplay = [[MTMathListDisplay alloc] initWithDisplays:rowDisplays range:table.indexRange];
+    
+    NSMutableArray<MTDisplay*>* finishedDisplays = [[NSMutableArray alloc] initWithObjects:tableDisplay, nil];
+    CGFloat offset = -7;
+    for (int i = 0; i < [table.alignmentString length]; i++) {
+        unichar c = [table.alignmentString characterAtIndex:i];
+        if (c == '|') {
+            MTLineDisplay* line = [[MTLineDisplay alloc] initWithStart:CGPointMake(offset, [[rowDisplays firstObject] position].y + [[rowDisplays firstObject] displayBounds].size.height + 7)
+                                                                   end:CGPointMake(offset, [[rowDisplays lastObject] position].y - 3)];
+            line.lineThickness = 0.5;
+            [finishedDisplays addObject:line];
+            offset += 3;
+        } else {
+            offset = 0;
+        }
+    }
+    tableDisplay = [[MTMathListDisplay alloc] initWithDisplays:finishedDisplays range:table.indexRange];
     tableDisplay.position = _currentPosition;
     return tableDisplay;
 }
@@ -1877,13 +1917,25 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
 {
     NSMutableArray<NSMutableArray<MTDisplay*>*> *displays = [NSMutableArray arrayWithCapacity:table.numRows];
     
-    for(NSArray<MTMathList*>* row in table.cells) {
+    for (NSArray<MTMathList*>* row in table.cells) {
         NSMutableArray<MTDisplay*>* colDisplays = [NSMutableArray arrayWithCapacity:row.count];
         [displays addObject:colDisplays];
+        CGFloat width = 0;
         for (int i = 0; i < row.count; i++) {
-            MTMathListDisplay* disp = [MTTypesetter createLineForMathList:row[i] font:_font style:_style cramped:NO];
-            columnWidths[i] = MAX(disp.width, columnWidths[i]);
-            [colDisplays addObject:disp];
+            MTMathList* list = row[i];
+            if ([list.atoms count] == 1 && [[list.atoms firstObject] isKindOfClass:[MTLine class]]) {
+                MTLineDisplay* disp = [[MTLineDisplay alloc] initWithStart:CGPointZero end:CGPointZero];
+                disp.lineThickness = 0.5;
+                [colDisplays addObject:disp];
+            } else {
+                MTMathListDisplay* disp = [MTTypesetter createLineForMathList:list font:_font style:_style cramped:NO];
+                width = MAX(disp.width, columnWidths[i]);
+                
+                disp = [MTTypesetter createLineForMathList:list font:_font style:_style cramped:NO];
+                
+                columnWidths[i] = width;
+                [colDisplays addObject:disp];
+            }
         };
     };
     return displays;
@@ -1938,14 +1990,24 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
     CGFloat prevRowDescent = 0;
     CGFloat ascent = 0;
     BOOL first = true;
+    CGFloat maxWidth = rows[0].displayBounds.size.width;
     CGFloat maxHeight = rows[0].displayBounds.size.height;
-    for (MTDisplay *row in rows)
+    for (MTDisplay *row in rows) {
+        if (row.displayBounds.size.width > maxWidth)
+            maxWidth = row.displayBounds.size.width;
         if (row.displayBounds.size.height > maxHeight)
             maxHeight = row.displayBounds.size.height;
+    }
     for (MTDisplay* row in rows) {
         if (first) {
-            row.position = CGPointZero;
-            ascent += row.ascent;
+            if ([row isKindOfClass:[MTLineDisplay class]]) {
+                MTLineDisplay* line = (MTLineDisplay*) row;
+                line.start = CGPointMake(0, 0);
+                line.end = CGPointMake(maxWidth, 0);
+            } else {
+                row.position = CGPointZero;
+                ascent += row.ascent;
+            }
             first = false;
         } else {
             CGFloat skip = baselineSkip;
@@ -1953,25 +2015,47 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
                 // rows are too close to each other. Space them apart further
                 skip = prevRowDescent + row.ascent + lineSkip;
             }
+            
+            if (!table.alignmentString) {
+                skip -= 10;
+            }
+            
             // We are going down so we decrease the y value.
-            if (row.displayBounds.size.height == 0) {
-                currPos -= maxHeight;
+            if ([row isKindOfClass:[MTLineDisplay class]]) {
+                MTLineDisplay* line = (MTLineDisplay*) row;
+                line.start = CGPointMake(0, currPos);
+                line.end = CGPointMake(maxWidth, currPos);
+                currPos -= 1;
+//            } else if (CGSizeEqualToSize(row.displayBounds.size, CGSizeZero)) {
+//                currPos -= maxHeight;
+            } else if (row.displayBounds.size.height == 0) {
+                currPos -= 7;
             } else {
                 currPos -= skip;
             }
             row.position = CGPointMake(0, currPos);
         }
-        prevRowDescent = row.descent;
+        if ([row isKindOfClass:[MTLineDisplay class]]) {
+            prevRowDescent = -9;
+        } else {
+            prevRowDescent = row.descent;
+        }
     }
     
     // Vertically center the whole structure around the axis
     // The descent of the structure is the position of the last row
     // plus the descent of the last row.
-    CGFloat descent =  - currPos + prevRowDescent;
+    CGFloat descent = - currPos + prevRowDescent;
     CGFloat shiftDown = 0.5*(ascent - descent) - _styleFont.mathTable.axisHeight;
     
     for (MTDisplay* row in rows) {
-        row.position = CGPointMake(row.position.x, row.position.y - shiftDown);
+        if ([row isKindOfClass:[MTLineDisplay class]]) {
+            MTLineDisplay* line = (MTLineDisplay*) row;
+            line.start = CGPointMake(-8, line.start.y - shiftDown - 5);
+            line.end = CGPointMake(maxWidth + 8, line.start.y);
+        } else {
+            row.position = CGPointMake(row.position.x, row.position.y - shiftDown);
+        }
     }
 }
 @end

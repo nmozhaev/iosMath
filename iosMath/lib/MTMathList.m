@@ -837,6 +837,7 @@ static NSString* typeToText(MTMathAtomType type) {
     op.interColumnSpacing = self.interColumnSpacing;
     op->_environment = self.environment;
     op.alignments = [NSMutableArray arrayWithArray:self.alignments];
+    op.alignmentString = self.alignmentString;
     // Perform a deep copy of the cells.
     NSMutableArray* cellCopy = [NSMutableArray arrayWithCapacity:self.cells.count];
     for (NSMutableArray* row in self.cells) {
@@ -909,6 +910,44 @@ static NSString* typeToText(MTMathAtomType type) {
 - (NSUInteger) numRows
 {
     return self.cells.count;
+}
+
+@end
+
+#pragma mark - MTLine
+
+@implementation MTLine
+
+- (instancetype)init
+{
+    self = [super initWithType:kMTMathLine value:@""];
+    return self;
+}
+
+- (instancetype)initWithType:(MTMathAtomType)type value:(NSString *)value
+{
+    if (type == kMTMathLine) {
+        return [self init];
+    }
+    @throw [NSException exceptionWithName:@"InvalidMethod"
+                                   reason:@"[MTLine initWithType:value:] cannot be called. Use [MTLine init] instead."
+                                 userInfo:nil];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MTLine* op = [super copyWithZone:zone];
+    op.start = self.start;
+    op.end = self.end;
+    return op;
+}
+
+- (instancetype)finalized
+{
+    MTLine* newLine = [super finalized];
+    newLine.start = self.start;
+    newLine.end = self.end;
+    return newLine;
 }
 
 @end

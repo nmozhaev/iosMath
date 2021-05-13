@@ -286,6 +286,7 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
 {
     NSAssert([env isEqualToString:@"array"], @"Should be array to use alignments");
     MTMathTable* table = [[MTMathTable alloc] initWithEnvironment:env];
+    table.alignmentString = alignments;
     for (int i = 0; i < rows.count; i++) {
         NSArray<MTMathList*>* row = rows[i];
         for (int j = 0; j < row.count; j++) {
@@ -294,9 +295,10 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
     }
     NSInteger cols = table.numColumns;
     MTColumnAlignment lastAlignment = kMTColumnAlignmentCenter;
+    NSString* alignmentsString = [[alignments stringByReplacingOccurrencesOfString:@"|" withString:@""] stringByReplacingOccurrencesOfString:@":" withString:@""];
     for (int i = 0; i < cols; i++) {
-        if (i < [alignments length]) {
-            NSString* alignmentString = [alignments substringWithRange:NSMakeRange(i, 1)];
+        if (i < [alignmentsString length]) {
+            NSString* alignmentString = [alignmentsString substringWithRange:NSMakeRange(i, 1)];
             if ([alignmentString isEqualToString:@"l"]) {
                 lastAlignment = kMTColumnAlignmentLeft;
             } else if ([alignmentString isEqualToString:@"c"]) {

@@ -50,6 +50,7 @@ NSString *const MTParseError = @"ParseError";
     MTEnvProperties* _currentEnv;
     MTFontStyle _currentFontStyle;
     BOOL _spacesAllowed;
+    BOOL _needsLine;
 }
 
 - (instancetype)initWithString:(NSString *)str
@@ -112,6 +113,11 @@ NSString *const MTParseError = @"ParseError";
 - (MTMathList*)buildInternal:(BOOL) oneCharOnly stopChar:(unichar) stop
 {
     MTMathList* list = [MTMathList new];
+    if (_needsLine) {
+        [list addAtom:[MTLine new]];
+        _needsLine = false;
+        return list;
+    }
     NSAssert(!(oneCharOnly && (stop > 0)), @"Cannot set both oneCharOnly and stopChar.");
     MTMathAtom* prevAtom = nil;
     while([self hasCharacters]) {
@@ -186,6 +192,14 @@ NSString *const MTParseError = @"ParseError";
             } else if (_error) {
                 return nil;
             }
+            if ([command isEqualToString:@"hline"]) {
+                if ([list.atoms count] > 0) {
+                    _needsLine = true;
+                    return list;
+                } else {
+                    return [MTMathList mathListWithAtoms:[MTLine new], nil];
+                }
+            }
             if ([self applyModifier:command atom:prevAtom]) {
                 continue;
             }
@@ -225,6 +239,7 @@ NSString *const MTParseError = @"ParseError";
             } else {
                 // Create a new table with the current list and a default env
                 MTMathAtom* table = [self buildTable:nil firstList:list alignments:nil row:NO];
+                table.type = kMTMathAtomTable;
                 return [MTMathList mathListWithAtoms:table, nil];
             }
         } else if (_spacesAllowed && ch == ' ') {
@@ -521,7 +536,7 @@ NSString *const MTParseError = @"ParseError";
     } else if ([command isEqualToString:@"raisebox"]) {
         // A fraction command has 2 arguments
         MTFraction* frac = [[MTFraction alloc] initWithRule:false];
-        frac.clearance = ([[self readDistance] floatValue] - 1.25) * 18;
+        frac.clearance = ([[self readDistance] floatValue] - 1.25) * 18.0;
         frac.numerator = [self buildInternal:true];
         return frac;
     } else if ([command isEqualToString:@"frac"]) {
@@ -580,9 +595,6 @@ NSString *const MTParseError = @"ParseError";
         MTUnderLine* under = [MTUnderLine new];
         under.innerList = [self buildInternal:true];
         return under;
-    } else if ([command isEqualToString:@"hline"]) {
-        MTCancelLine* cancel = [MTCancelLine new];
-        return cancel;
     } else if ([command isEqualToString:@"begin"]) {
         NSString* env = [self readEnvironment];
         if (!env) {
@@ -662,7 +674,7 @@ NSString *const MTParseError = @"ParseError";
         MTMathList* fracList = [MTMathList new];
         [fracList addAtom:frac];
         return fracList;
-    } else if ([command isEqualToString:@"\\"] || [command isEqualToString:@"cr"]) {
+    } else if ([command isEqualToString:@"\\"] || [command isEqualToString:@"cr"] || [command isEqualToString:@"newline"]) {
         if (_currentEnv) {
             // Stop the current list and increment the row count
             _currentEnv.numRows++;
@@ -754,8 +766,22 @@ NSString *const MTParseError = @"ParseError";
             // If there is an error building the list, bail out early.
             return nil;
         }
-        rows[currentRow][currentCol] = list;
-        currentCol++;
+//        if ([list.atoms count] == 0) {
+//            continue;
+//        }
+        if ([list.atoms count] == 1 && [[list.atoms firstObject] isKindOfClass:[MTLine class]]) {
+            if (currentCol > 0) {
+                currentRow += 1;
+            }
+            rows[currentRow] = [NSMutableArray arrayWithObject:list];
+            
+            currentRow += 1;
+            currentCol = 0;
+            rows[currentRow] = [NSMutableArray array];
+        } else {
+            rows[currentRow][currentCol] = list;
+            currentCol++;
+        }
         if (_currentEnv.numRows > currentRow) {
             currentRow = _currentEnv.numRows;
             rows[currentRow] = [NSMutableArray array];

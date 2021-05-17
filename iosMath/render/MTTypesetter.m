@@ -605,8 +605,12 @@ static void getBboxDetails(CGRect bbox, CGFloat* ascent, CGFloat* descent)
                     [self addDisplayLine];
                 }
                 MTMathSpace* space = (MTMathSpace*) atom;
+                MTDisplay* display = [MTDisplay new];
+                display.width = space.space * _styleFont.mathTable.muUnit;
+                display.position = _currentPosition;
                 // add the desired space
                 _currentPosition.x += space.space * _styleFont.mathTable.muUnit;
+                [_displayAtoms addObject:display];
                 // Since this is extra space, the desired interelement space between the prevAtom
                 // and the next node is still preserved. To avoid resetting the prevAtom and lastType
                 // we skip to the next node.
@@ -1998,12 +2002,14 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
         if (row.displayBounds.size.height > maxHeight)
             maxHeight = row.displayBounds.size.height;
     }
+
+    MTDisplay* lastRow;
     for (MTDisplay* row in rows) {
         if (first) {
             if ([row isKindOfClass:[MTLineDisplay class]]) {
                 MTLineDisplay* line = (MTLineDisplay*) row;
-                line.start = CGPointMake(0, 0);
-                line.end = CGPointMake(maxWidth, 0);
+                line.start = CGPointMake(-8, 0);
+                line.end = CGPointMake(maxWidth + 8, 0);
             } else {
                 row.position = CGPointZero;
                 ascent += row.ascent;
@@ -2011,23 +2017,20 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
             first = false;
         } else {
             CGFloat skip = baselineSkip;
-            if (skip - (prevRowDescent + row.ascent) < lineSkipLimit) {
+            if (skip - (prevRowDescent + row.ascent) < lineSkipLimit && table.alignmentString) {
                 // rows are too close to each other. Space them apart further
                 skip = prevRowDescent + row.ascent + lineSkip;
             }
-            
-            if (!table.alignmentString) {
-                skip -= 10;
+            if (lastRow.displayBounds.size.height > skip) {
+                currPos -= lastRow.displayBounds.size.height - 24;
             }
             
             // We are going down so we decrease the y value.
             if ([row isKindOfClass:[MTLineDisplay class]]) {
                 MTLineDisplay* line = (MTLineDisplay*) row;
-                line.start = CGPointMake(0, currPos);
-                line.end = CGPointMake(maxWidth, currPos);
-                currPos -= 1;
-//            } else if (CGSizeEqualToSize(row.displayBounds.size, CGSizeZero)) {
-//                currPos -= maxHeight;
+                line.start = CGPointMake(-8, currPos - 3);
+                line.end = CGPointMake(maxWidth + 8, currPos - 3);
+                currPos -= 3;
             } else if (row.displayBounds.size.height == 0) {
                 currPos -= 7;
             } else {
@@ -2036,10 +2039,11 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
             row.position = CGPointMake(0, currPos);
         }
         if ([row isKindOfClass:[MTLineDisplay class]]) {
-            prevRowDescent = -9;
+            prevRowDescent = 0;
         } else {
             prevRowDescent = row.descent;
         }
+        lastRow = row;
     }
     
     // Vertically center the whole structure around the axis
@@ -2047,7 +2051,7 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
     // plus the descent of the last row.
     CGFloat descent = - currPos + prevRowDescent;
     CGFloat shiftDown = 0.5*(ascent - descent) - _styleFont.mathTable.axisHeight;
-    
+
     for (MTDisplay* row in rows) {
         if ([row isKindOfClass:[MTLineDisplay class]]) {
             MTLineDisplay* line = (MTLineDisplay*) row;

@@ -14,7 +14,6 @@
 
 @property (nonatomic) CGFloat ascent;
 @property (nonatomic) CGFloat descent;
-@property (nonatomic) CGFloat width;
 @property (nonatomic) NSRange range;
 @property (nonatomic) BOOL hasScript;
 

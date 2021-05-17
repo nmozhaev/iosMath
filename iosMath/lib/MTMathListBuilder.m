@@ -766,9 +766,6 @@ NSString *const MTParseError = @"ParseError";
             // If there is an error building the list, bail out early.
             return nil;
         }
-//        if ([list.atoms count] == 0) {
-//            continue;
-//        }
         if ([list.atoms count] == 1 && [[list.atoms firstObject] isKindOfClass:[MTLine class]]) {
             if (currentCol > 0) {
                 currentRow += 1;

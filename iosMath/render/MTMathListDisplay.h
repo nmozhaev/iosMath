@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// The distance from the axis to the bottom of the display
 @property (nonatomic, readonly) CGFloat descent;
 /// The width of the display
-@property (nonatomic, readonly) CGFloat width;
+@property (nonatomic) CGFloat width;
 /// Position of the display with respect to the parent view or display.
 @property (nonatomic) CGPoint position;
 /// The range of characters supported by this item

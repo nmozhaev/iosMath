@@ -462,9 +462,7 @@ NSString *const MTParseError = @"ParseError";
         [self setError:MTParseErrorCharacterNotFound message:@"Missing }"];
         return nil;
     }
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    formatter.numberStyle = NSNumberFormatterDecimalStyle;
-    return [formatter numberFromString:mutable];
+    return [[NSNumber alloc] initWithFloat: mutable.floatValue];
 }
 
 - (MTMathAtom*) getBoundaryAtom:(NSString*) delimiterType

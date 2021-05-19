@@ -1935,8 +1935,6 @@ static const CGFloat kJotMultiplier = 0.3; // A jot is 3pt for a 10pt font.
                 MTMathListDisplay* disp = [MTTypesetter createLineForMathList:list font:_font style:_style cramped:NO];
                 width = MAX(disp.width, columnWidths[i]);
                 
-                disp = [MTTypesetter createLineForMathList:list font:_font style:_style cramped:NO];
-                
                 columnWidths[i] = width;
                 [colDisplays addObject:disp];
             }

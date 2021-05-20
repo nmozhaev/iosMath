@@ -769,10 +769,7 @@ NSString *const MTParseError = @"ParseError";
                 currentRow += 1;
             }
             rows[currentRow] = [NSMutableArray arrayWithObject:list];
-            
-            currentRow += 1;
-            currentCol = 0;
-            rows[currentRow] = [NSMutableArray array];
+            _currentEnv.numRows++;
         } else {
             rows[currentRow][currentCol] = list;
             currentCol++;

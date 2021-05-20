@@ -79,9 +79,11 @@ NSString *const MTSymbolDegree = @"\u00B0"; // \circ
 + (nullable MTMathAtom *)atomForCharacter:(unichar)ch
 {
     NSString *chStr = [NSString stringWithCharacters:&ch length:1];
-    if (ch == '$' || ch == '%' || ch == '#' || ch == '&' || ch == '~' || ch == '\'') {
+    if (ch == '$' || ch == '%' || ch == '#' || ch == '&' || ch == '\'') {
         // These are latex control characters that have special meanings. We don't support them.
         return nil;
+    } else if (ch == '~') {
+        return [[MTMathSpace alloc] initWithSpace:4.4];
     } else if (ch == '^' || ch == '_' || ch == '{' || ch == '}' || ch == '\\') {
         // more special characters for Latex.
         return nil;

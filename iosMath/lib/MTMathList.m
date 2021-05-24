@@ -975,6 +975,7 @@ static NSString* typeToText(MTMathAtomType type) {
 - (id)copyWithZone:(NSZone *)zone
 {
     MTCancelLine* op = [super copyWithZone:zone];
+    op.style = self.style;
     op.innerList = [self.innerList copyWithZone:zone];
     return op;
 }
@@ -982,6 +983,7 @@ static NSString* typeToText(MTMathAtomType type) {
 - (instancetype)finalized
 {
     MTCancelLine* newCancelline = [super finalized];
+    newCancelline.style = self.style;
     newCancelline.innerList = newCancelline.innerList.finalized;
     return newCancelline;
 }

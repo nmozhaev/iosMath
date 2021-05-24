@@ -201,7 +201,7 @@ static BOOL isIos6Supported() {
     [super setTextColor:textColor];
     for (MTDisplay* displayAtom in self.subDisplays) {
         // set the global color, if there is no local color
-        if(displayAtom.localTextColor == nil) {
+        if (displayAtom.localTextColor == nil) {
             displayAtom.textColor = textColor;
         } else {
             displayAtom.textColor = displayAtom.localTextColor;
@@ -831,7 +831,7 @@ static BOOL isIos6Supported() {
 - (void) updateInnerPosition
 {
     if (self.inner) {
-        self.inner.position = CGPointMake(self.position.x, self.position.y);
+        self.inner.position = CGPointMake(self.position.x + self.insets.left, self.position.y + self.insets.top);
     }
 }
 

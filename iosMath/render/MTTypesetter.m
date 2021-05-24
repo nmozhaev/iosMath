@@ -1713,12 +1713,29 @@ static const NSInteger kDelimiterShortfallPoints = 5;
     MTMathListDisplay* innerListDisplay = [MTTypesetter createLineForMathList:cancel.innerList font:_font style:_style cramped:YES];
     MTLineDisplay* lineDisplay = [[MTLineDisplay alloc] initWithInner:innerListDisplay position:_currentPosition range:cancel.indexRange];
     // Move the line down by the vertical gap.
-    lineDisplay.lineShiftUp = innerListDisplay.ascent / 2;
     lineDisplay.lineThickness = _styleFont.mathTable.fractionRuleThickness;
+    switch (cancel.style) {
+        case kMTCancelStyleOut:
+            lineDisplay.lineShiftUp = innerListDisplay.ascent / 2;
+            lineDisplay.insets = UIEdgeInsetsMake(0, 2.5, 0, 2.5);
+            break;
+        case kMTCancelStyleRight:
+            lineDisplay.start = CGPointMake(2, -(innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap));
+            lineDisplay.end = CGPointMake(innerListDisplay.displayBounds.size.width - 2, innerListDisplay.displayBounds.size.height + (innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap));
+            lineDisplay.insets = UIEdgeInsetsMake(0, 1, 0, 1);
+            break;
+        case kMTCancelStyleLeft:
+            lineDisplay.start = CGPointMake(2, innerListDisplay.displayBounds.size.height + (innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap));
+            lineDisplay.end = CGPointMake(innerListDisplay.displayBounds.size.width - 2, -(innerListDisplay.descent + _styleFont.mathTable.underbarVerticalGap));
+            lineDisplay.insets = UIEdgeInsetsMake(0, 1, 0, 1);
+            break;
+        default:
+            break;
+    }
     lineDisplay.ascent = innerListDisplay.ascent;
     lineDisplay.descent = innerListDisplay.descent;
-    lineDisplay.width = innerListDisplay.width;
-    lineDisplay.insets = UIEdgeInsetsMake(0, 2.5, 0, 2.5);
+    lineDisplay.width = innerListDisplay.width + lineDisplay.insets.left + lineDisplay.insets.right;
+    [lineDisplay updateInnerPosition];
     return lineDisplay;
 }
 

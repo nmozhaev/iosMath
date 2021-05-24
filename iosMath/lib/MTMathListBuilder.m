@@ -522,6 +522,21 @@ NSString *const MTParseError = @"ParseError";
         cancel.style = kMTCancelStyleOut;
         cancel.innerList = [self buildInternal:true];
         return cancel;
+    } else if ([command isEqualToString:@"cancel"]) {
+        MTCancelLine* cancel = [MTCancelLine new];
+        cancel.style = kMTCancelStyleRight;
+        cancel.innerList = [self buildInternal:true];
+        return cancel;
+    } else if ([command isEqualToString:@"bcancel"]) {
+        MTCancelLine* cancel = [MTCancelLine new];
+        cancel.style = kMTCancelStyleLeft;
+        cancel.innerList = [self buildInternal:true];
+        return cancel;
+    } else if ([command isEqualToString:@"xcancel"]) {
+        MTCancelLine* cancel = [MTCancelLine new];
+        cancel.style = kMTCancelStyleBoth;
+        cancel.innerList = [self buildInternal:true];
+        return cancel;
     } else if ([command isEqualToString:@"mathrlap"]) {
         MTMathOverlap* overlap = [MTMathOverlap new];
         overlap.overlapList = [self buildInternal:true];

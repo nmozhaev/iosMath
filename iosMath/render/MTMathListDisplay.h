@@ -171,6 +171,8 @@ typedef NS_ENUM(unsigned int, MTLinePosition)  {
 @property (nonatomic) CGPoint start;
 @property (nonatomic) CGPoint end;
 
+- (void) updateInnerPosition;
+
 @end
 
 @interface MTCurveBracketDisplay : MTLineDisplay

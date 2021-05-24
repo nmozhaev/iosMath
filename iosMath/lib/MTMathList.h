@@ -326,6 +326,7 @@ typedef NS_ENUM(NSUInteger, MTCancelStyle)
     kMTCancelStyleOut = 0,
     kMTCancelStyleRight,
     kMTCancelStyleLeft,
+    kMTCancelStyleBoth,
 };
 
 /// Creates an empty over
